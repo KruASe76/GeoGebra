@@ -5,6 +5,7 @@ import shutil
 import zipfile
 from dataclasses import dataclass
 from folder2zip import convert
+import matplotlib
 
 @dataclass
 class Color:
@@ -70,6 +71,8 @@ class Point:
     def commit(self, element: Element) -> None:
         for child in element:
             element.remove(child)
+        
+        element.attrib["label"] = self.label
         
         element.extend(
             [
@@ -242,18 +245,14 @@ root = tree.getroot()
 construction: Element = root.find("construction")
 
 for point_elem in construction.findall('element[@type="point"]'):
-    # point = Point.from_element(point_elem)
-    # print(point)
-    # new_point_elem = point.to_element()
-    # print(list(new_point_elem))
-    # new_point = Point.from_element(new_point_elem)
-    # print(point == new_point)
-    # exit()
-    
     point = Point.from_element(point_elem)
     
     point.style = 4
-    point.color = Color(0, 255, 0, 0)
+    if not point.show_object:
+        point.color = Color(150, 0, 0, 0)
+    else:
+        point.color = Color(0, 255, 0, 0)
+    point.show_object = True
     
     point.commit(point_elem)
 
