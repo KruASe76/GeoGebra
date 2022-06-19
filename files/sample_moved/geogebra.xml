@@ -3,7 +3,8 @@
 	xsi:noNamespaceSchemaLocation="http://www.geogebra.org/apps/xsd/ggb.xsd" xmlns=""
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<gui>
-		<window width="1522" height="774" />
+    <!-- Window size -->
+		<window width="1522" height="1000" />
 		<perspectives>
 			<perspective id="tmp">
 				<panes>
@@ -50,23 +51,30 @@
 		<labelingStyle val="3" />
 		<font size="16" />
 	</gui>
+  <!-- Field settings -->
 	<euclidianView>
 		<viewNumber viewNo="1" />
-		<size width="1141" height="773" />
-    <!-- TODO: -->
-		<coordSystem xZero="570.5" yZero="386.5" scale="50" yscale="50.00000000000004" />
+    <!-- Plan size? (No effect) -->
+		<size width="100" height="100" />
+    <!-- Center coords ((0, 0) = left top corner); Xscale, Yscale - default (50, 50) -->
+		<coordSystem xZero="500" yZero="500" scale="50" yscale="50" />
+    <!-- Grid settings -->
 		<evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26"
 			gridType="3" />
+    <!-- Colors -->
 		<bgColor r="255" g="255" b="255" />
 		<axesColor r="0" g="0" b="0" />
 		<gridColor r="192" g="192" b="192" />
 		<lineStyle axes="1" grid="0" />
+    <!-- Axes -->
 		<axis id="0" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true" />
 		<axis id="1" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true" />
 	</euclidianView>
 	<algebraView>
+    <!-- ? -->
 		<mode val="3" />
 	</algebraView>
+  <!-- ? -->
 	<kernel>
 		<continuous val="false" />
 		<usePathAndRegionParameters val="true" />
