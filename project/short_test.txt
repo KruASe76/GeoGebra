@@ -1,22 +1,23 @@
-# это тестовая геометрическая ggb-конструкция на кратком языке short (очень сокращенный python)
+# это тестовая геометрическая ggb-конструкция на кратком языке short commands
 
-x = 5                   # переменная (объект Var)
-y = x + 2               # переменная
-Smth = Point(x, y)      # точка с заданными координатами и использованием переменных
-
-A = Point(1.5, 2)       # точка с заданными координатами в виде чисел
-B = Point(XCoord(Smth), YCoord(Smth) - 2)   # точка с заданными координатами со вложенными командами
-
-ω = Circle(A, B)        # окружность по центру A и точке B на окружности
-r = Radius(ω)           # переменной r присваевается значение команды Radius
-C = Point(ω)            # случайная точка на окружности
-
-D = Point(Line(A, B))   
-E = Intersect(ω, Line(C, D))
-segm1 = Segment(D, E)
-
-f(x) = x^2              # заданная функция (объект Expression)
-poly1 = Polygon(segm1, f(2))    # правильный многоугольник со стороной segm1 и количеством вершин f(2) = 4
-
-[E, E1] = Intersect(ω, Line(C, D))
-[poly1, A1, A2, A3, A4] = Polygon(segm1, 4)
+Assign	5	>>	x
+Assign	_expr1	>>	y
+Point	x, y	>>	Smth
+Point	1.5, 2	>>	A
+XCoord	Smth	>>	_var1
+YCoord	Smth	>>	_var2
+Point	_var1, _expr2	>>	B
+Circle	A, B	>>	ω
+Point	ω	>>	R
+Point	ω	>>	C
+Point	ω	>>	_elem1
+Line	A, B	>>	_elem2
+Point	_elem2	>>	D
+Line	C, D	>>	_elem3
+Intersect	ω, _elem2	>>	E, _elem4
+Segment	D, E	>>	segm1
+Assign	_expr2	>>	f
+Polygon	segm1, _expr3	>>	poly1, D, E, _elem5, _elem6, segm1, _elem7, _elem8, _elem9
+Line	C, D	>>	_elem10
+Intersect	ω, _elem10	>>	E, E1
+Polygon	segm1, 4	>>	poly1, A1, A2, A3, A4, segm1, _elem11, _elem12, _elem13

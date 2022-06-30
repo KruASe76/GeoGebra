@@ -4,11 +4,9 @@ import numpy as np
 #--------------------------------------------------------------------------
 
 class Element:
-    def __init__(self, label, element_dict):
-        self.data = None
-        self.label = label
-        assert(label not in element_dict)
-        element_dict[label] = self
+    def __init__(self, name, data = None):
+        self.name = name
+        self.data = data
 
     def drawable(self):
         return isinstance(self.data, (Point, Line, Angle, Polygon, Circle, Vector))
@@ -27,7 +25,6 @@ class Element:
         elif isinstance(self.data, Segment): return self.data.length
         elif isinstance(self.data, Polygon): return command_module.area_P(self.data).x
         else: return None
-
 
 #--------------------------------------------------------------------------
 
@@ -345,50 +342,3 @@ class Vector:
         cr.line_to(*self.end_points[1]+tip_vec-tip_vec2)
         cr.move_to(*self.end_points[1])
         cr.fill()
-
-class Measure:
-    def __init__(self, x, dim = 0):
-        self.x = x
-        self.dim = dim
-    def __repr__(self):
-        return "Measure{}({})".format(self.dim, self.x)
-
-    def translate(self, vec):
-        pass
-    def scale(self, ratio):
-        if self.dim != 0: self.x *= ratio ** self.dim
-
-    def equivalent(self, other):
-        if not isinstance(other, Measure): return False
-        return np.isclose(self.x, other.x)
-
-class AngleSize:
-    def __init__(self, x):
-        self.x = x
-    def __repr__(self):
-        return "AngleSize({}°)".format(self.x/np.pi * 180)
-
-    def translate(self, vec):
-        pass
-    def scale(self, ratio):
-        pass
-
-    def equivalent(self, other):
-        if isinstance(other, Angle): return np.isclose(self.x, other.angle)
-        if isinstance(other, AngleSize): return np.isclose(self.x, other.x)
-        return False
-
-class Boolean:
-    def __init__(self, b):
-        self.b = b
-    def __repr__(self):
-        return "Boolean({})".format(self.b)
-
-    def translate(self, vec):
-        pass
-    def scale(self, ratio):
-        pass
-
-    def equivalent(self, other):
-        if not isinstance(other, Boolean): return False
-        return self.b == other.b

@@ -1,39 +1,24 @@
 import numpy as np
 
+import lib_vars as vars
 import lib_elements as elements
 
 #--------------------------------------------------------------------------
 
 class Command:
-    def __init__(self, command_name, input_elements, output_elements):
-        self.name = command_name
-        self.input_elements = input_elements
-        self.output_elements = output_elements
+    def __init__(self, name, inputs, outputs):
+        self.name = name
+        self.inputs = inputs
+        self.outputs = outputs
 
-    def apply(self):
-        input_data = [x.data for x in self.input_elements]
-        name = command_types_name(self.name, input_data)
-        if name not in command_dict: name = self.name
-        f = command_dict[name]
-        output_data = f(*input_data)
-        if not isinstance(output_data, (tuple, list)): output_data = (output_data,)
-        assert(len(output_data) == len(self.output_elements))
-        for x,o in zip(output_data, self.output_elements):
-            if o is not None: o.data = x
-
-    def __str__(self):
+    def __repr__(self):
         inputs_str = ' '.join([x.label for x in self.inputs])
         outputs_str = ' '.join([x.label if x is not None else "_" for x in self.outputs])
-        return "{} : {} -> {}".format(
-            self.name, inputs_str, outputs_str
-        )
+        return "{}: {} >> {}".format(self.name, inputs_str, outputs_str)
 
 #--------------------------------------------------------------------------        
 
 type_to_shortcut = {
-    int       : 'i',
-    Boolean   : 'b',
-    Measure   : 'm',
     Point     : 'p',
     Polygon   : 'P',
     Circle    : 'c',
@@ -42,8 +27,12 @@ type_to_shortcut = {
     Ray       : 'r',
     Segment   : 's',
     Angle     : 'a',
-    AngleSize : 'A',
     Vector    : 'v',
+
+    int       : 'i',
+    Boolean   : 'b',
+    Measure   : 'm',
+    AngleSize : 'A',
 }
 
 def command_types_name(name, params):
@@ -77,7 +66,7 @@ def angular_bisector_ss(l1, l2):
     return angular_bisector_ll(l1, l2)
 
 def are_collinear_ppp(p1, p2, p3):
-    return elements.Boolean(np.linalg.matrix_rank([p1.a-p2.a, p1.a-p3.a]) <= 1)
+    return vars.Boolean(np.linalg.matrix_rank([p1.a-p2.a, p1.a-p3.a]) <= 1)
 
 def are_concurrent_lll(l1, l2, l3):
     lines = l1,l2,l3
@@ -90,7 +79,7 @@ def are_concurrent_lll(l1, l2, l3):
 
     l1, l2, l3 = tuple(zip(*sorted(differences)))[2]
     x = intersect_ll(l1, l2)
-    return elements.Boolean(np.isclose(np.dot(x.a, l3.n), l3.c))
+    return vars.Boolean(np.isclose(np.dot(x.a, l3.n), l3.c))
 
 def are_concurrent(o1, o2, o3):
     cand = []
@@ -111,50 +100,49 @@ def are_concurrent(o1, o2, o3):
     for p in cand:
         for obj in (o1,o2,o3):
             if not obj.contains(p.a): break
-        else: return elements.Boolean(True)
+        else: return vars.Boolean(True)
 
-    return elements.Boolean(False)
+    return vars.Boolean(False)
 
 def are_concyclic_pppp(p1, p2, p3, p4):
-
     z1, z2, z3, z4 = (elements.a_to_cpx(p.a) for p in (p1, p2, p3, p4))
     cross_ratio = (z1-z3)*(z2-z4)*(((z1-z4)*(z2-z3)).conjugate())
-    return elements.Boolean(np.isclose(cross_ratio.imag, 0))
+    return vars.Boolean(np.isclose(cross_ratio.imag, 0))
 
 def are_congruent_aa(a1, a2):
     #print(a1.angle, a2.angle)
     result = np.isclose((a1.angle-a2.angle+1)%(2*np.pi), 1)
     result = (result or np.isclose((a1.angle+a2.angle+1)%(2*np.pi), 1))
-    return elements.Boolean(result)
+    return vars.Boolean(result)
 
 def are_complementary_aa(a1, a2):
     #print(a1.angle, a2.angle)
     result = np.isclose((a1.angle-a2.angle)%(2*np.pi), np.pi)
     result = (result or np.isclose((a1.angle+a2.angle)%(2*np.pi), np.pi))
-    return elements.Boolean(result)
+    return vars.Boolean(result)
 
 def are_congruent_ss(s1, s2):
     l1, l2 = (
         np.linalg.norm(s.end_points[1] - s.end_points[0])
         for s in (s1, s2)
     )
-    return elements.Boolean(np.isclose(l1, l2))
+    return vars.Boolean(np.isclose(l1, l2))
 
 def are_equal_mm(m1, m2):
     assert(m1.dim == m2.dim)
-    return elements.Boolean(np.isclose(m1.x, m2.x))
+    return vars.Boolean(np.isclose(m1.x, m2.x))
 
 def are_equal_mi(m, i):
     assert(m.dim == 0)
-    return elements.Boolean(np.isclose(m.x, i))
+    return vars.Boolean(np.isclose(m.x, i))
 
 def are_equal_pp(p1, p2):
-    return elements.Boolean(np.isclose(p1.a, p2.a).all())
+    return vars.Boolean(np.isclose(p1.a, p2.a).all())
 
 def are_parallel_ll(l1, l2):
-    if np.isclose(l1.n, l2.n).all(): return elements.Boolean(True)
-    if np.isclose(l1.n, -l2.n).all(): return elements.Boolean(True)
-    return elements.Boolean(False)
+    if np.isclose(l1.n, l2.n).all(): return vars.Boolean(True)
+    if np.isclose(l1.n, -l2.n).all(): return vars.Boolean(True)
+    return vars.Boolean(False)
 
 def are_parallel_ls(l, s):
     return are_parallel_ll(l, s)
@@ -169,9 +157,9 @@ def are_parallel_ss(s1, s2):
     return are_parallel_ll(s1, s2)
 
 def are_perpendicular_ll(l1, l2):
-    if np.isclose(l1.n, l2.v).all(): return elements.Boolean(True)
-    if np.isclose(l1.n, -l2.v).all(): return elements.Boolean(True)
-    return elements.Boolean(False)
+    if np.isclose(l1.n, l2.v).all(): return vars.Boolean(True)
+    if np.isclose(l1.n, -l2.v).all(): return vars.Boolean(True)
+    return vars.Boolean(False)
 
 def are_perpendicular_lr(l, r):
     return are_perpendicular_ll(l, r)
@@ -195,7 +183,7 @@ def area(*points):
         np.cross(v1, v2)
         for v1, v2 in zip(vecs, vecs[1:])
     )
-    return elements.Measure(abs(cross_sum)/2, 2)
+    return vars.Measure(abs(cross_sum)/2, 2)
 
 def area_P(polygon):
     points = [elements.Point(p) for p in polygon.points]
@@ -221,44 +209,44 @@ def circle_ps(p, s):
     return elements.Circle(p.a, s.length)
 
 def contained_by_pc(point, by_circle):
-    return elements.Boolean(by_circle.contains(point.a))
+    return vars.Boolean(by_circle.contains(point.a))
 
 def contained_by_pl(point, by_line):
-    return elements.Boolean(by_line.contains(point.a))
+    return vars.Boolean(by_line.contains(point.a))
 
 def distance_pp(p1, p2):
-    return elements.Measure(np.linalg.norm(p1.a-p2.a), 1)
+    return vars.Measure(np.linalg.norm(p1.a-p2.a), 1)
 
 def equality_aa(a1, a2):
     return are_congruent_aa(a1, a2)
 
 def equality_mm(m1, m2):
     assert(m1.dim == m2.dim)
-    return elements.Boolean(np.isclose(m1.x, m2.x))
+    return vars.Boolean(np.isclose(m1.x, m2.x))
 
 def equality_ms(m, s):
     assert(m.dim == 1)
-    return elements.Boolean(np.isclose(m.x, s.length))
+    return vars.Boolean(np.isclose(m.x, s.length))
 
 def equality_mi(m, i):
     assert(m.dim == 0 or i == 0)
-    return elements.Boolean(np.isclose(m.x, i))
+    return vars.Boolean(np.isclose(m.x, i))
 
 def equality_pp(p1, p2):
     return are_equal_pp(p1, p2)
 
 def equality_Pm(polygon, m):
     assert(m.dim == 2)
-    return elements.Boolean(np.isclose(area_P(polygon).x, m.x))
+    return vars.Boolean(np.isclose(area_P(polygon).x, m.x))
 
 def equality_PP(poly1, poly2):
-    return elements.Boolean(np.isclose(area_P(poly1).x, area_P(poly2).x))
+    return vars.Boolean(np.isclose(area_P(poly1).x, area_P(poly2).x))
 
 def equality_sm(s, m):
     return equality_ms(m,s)
 
 def equality_ss(s1, s2):
-    return elements.Boolean(np.isclose(s1.length, s2.length))
+    return vars.Boolean(np.isclose(s1.length, s2.length))
 
 def equality_si(s, i): # !!!
     pass # TODO
@@ -389,28 +377,28 @@ def midpoint_s(segment):
     return elements.Point((p1+p2)/2)
 
 def minus_a(angle):
-    return elements.AngleSize(-angle.angle)
+    return vars.AngleSize(-angle.angle)
 
 def minus_A(anglesize):
-    return elements.AngleSize(-anglesize.x)
+    return vars.AngleSize(-anglesize.x)
 
 def minus_m(m):
-    return elements.Measure(-m.x, m.dim)
+    return vars.Measure(-m.x, m.dim)
 
 def minus_mm(m1, m2):
     assert(m1.dim == m2.dim)
-    return elements.Measure(m1.x-m2.x, m1.dim)
+    return vars.Measure(m1.x-m2.x, m1.dim)
 
 def minus_ms(m, s):
     assert(m.dim == 1)
-    return elements.Measure(m.x-s.length, 1)
+    return vars.Measure(m.x-s.length, 1)
 
 def minus_sm(s, m):
     assert(m.dim == 1)
-    return elements.Measure(s.length-m.x, 1)
+    return vars.Measure(s.length-m.x, 1)
 
 def minus_ss(s1, s2):
-    return elements.Measure(s1.length-s2.length, 1)
+    return vars.Measure(s1.length-s2.length, 1)
 
 def mirror_cc(circle, by_circle):
     center_v = circle.c - by_circle.c
@@ -505,76 +493,76 @@ def polygon(*points):
 
 def power_mi(m, i):
     assert(i == 2)
-    return elements.Measure(m.x ** i, m.dim*i)
+    return vars.Measure(m.x ** i, m.dim*i)
 
 def power_si(s, i):
-    return elements.Measure(s.length ** i, i)
+    return vars.Measure(s.length ** i, i)
 
 def product_mm(m1, m2):
-    return elements.Measure(m1.x * m2.x, m1.dim + m2.dim)
+    return vars.Measure(m1.x * m2.x, m1.dim + m2.dim)
 
 def product_ms(m, s):
-    return elements.Measure(m.x * s.length, m.dim + 1)
+    return vars.Measure(m.x * s.length, m.dim + 1)
 
 def product_mf(m, f):
-    return elements.Measure(m.x * f, m.dim)
+    return vars.Measure(m.x * f, m.dim)
 
 def product_sm(s, m):
     return product_ms(m,s)
 
 def product_ss(s1, s2):
-    return elements.Measure(s1.length * s2.length, 2)
+    return vars.Measure(s1.length * s2.length, 2)
 
 def product_fm(f, m):
     return product_mf(m, f)
 
 def product_ff(f1, f2):
-    return elements.Measure(f1*f2, 0)
+    return vars.Measure(f1*f2, 0)
 
 def product_iA(i, angle_size):
-    return elements.AngleSize(angle_size.x * i)
+    return vars.AngleSize(angle_size.x * i)
 
 def product_im(i, m):
-    return elements.Measure(i*m.x, m.dim)
+    return vars.Measure(i*m.x, m.dim)
 
 def product_is(i, s):
-    return elements.Measure(i*s.length, 1)
+    return vars.Measure(i*s.length, 1)
 
 def product_if(i, f):
-    return elements.Measure(i*f, 0)
+    return vars.Measure(i*f, 0)
 
 def prove_b(x):
     print(x.b)
     return x
 
 def radius_c(circle):
-    return elements.Measure(circle.r, 1)
+    return vars.Measure(circle.r, 1)
 
 def ratio_mm(m1, m2):
     assert(not np.isclose(m1.x, 0))
-    return elements.Measure(m1.x / m2.x, m1.dim - m2.dim)
+    return vars.Measure(m1.x / m2.x, m1.dim - m2.dim)
 
 def ratio_ms(m, s):
-    return elements.Measure(m.x / s.length, m.dim - 1)
+    return vars.Measure(m.x / s.length, m.dim - 1)
 
 def ratio_mi(m, i):
     assert(i != 0)
-    return elements.Measure(m.x / i, m.dim)
+    return vars.Measure(m.x / i, m.dim)
 
 def ratio_sm(s, m):
     assert(not np.isclose(m.x, 0))
-    return elements.Measure(s.length / m.x, 1 - m.dim)
+    return vars.Measure(s.length / m.x, 1 - m.dim)
 
 def ratio_ss(s1, s2):
-    return elements.Measure(s1.length / s2.length, 0)
+    return vars.Measure(s1.length / s2.length, 0)
 
 def ratio_si(s, i):
     assert(i != 0)
-    return elements.Measure(s.length / i, 1)
+    return vars.Measure(s.length / i, 1)
 
 def ratio_ii(i1, i2):
     assert(i2 != 0)
-    return elements.Measure(i1 / i2, 0)
+    return vars.Measure(i1 / i2, 0)
 
 def ray_pp(p1, p2):
     return elements.Ray(p1.a, p2.a-p1.a)
@@ -598,18 +586,18 @@ def semicircle(p1, p2):
 
 def sum_mm(m1, m2):
     assert(m1.dim == m2.dim)
-    return elements.Measure(m1.x + m2.x, m1.dim)
+    return vars.Measure(m1.x + m2.x, m1.dim)
 
 def sum_ms(m, s):
     assert(m.dim == 1)
-    return elements.Measure(m.x + s.length, 1)
+    return vars.Measure(m.x + s.length, 1)
 
 def sum_mi(m, i):
     assert(m.dim == 0)
-    return elements.Measure(m.x + i, 0)
+    return vars.Measure(m.x + i, 0)
 
 def sum_ss(s1, s2):
-    return elements.Measure(s1.length + s2.length, 1)
+    return vars.Measure(s1.length + s2.length, 1)
 
 def tangent_pc(point, circle):
     polar = polar_pc(point, circle)
@@ -620,10 +608,10 @@ def tangent_pc(point, circle):
 
 def touches_cc(c1, c2):
     lens = c1.r, c2.r, np.linalg.norm(c1.c-c2.c)
-    return elements.Boolean(np.isclose(sum(lens), 2*max(lens)))
+    return vars.Boolean(np.isclose(sum(lens), 2*max(lens)))
 
 def touches_lc(line, circle):
-    return elements.Boolean(
+    return vars.Boolean(
         np.isclose(circle.r, np.abs(np.dot(line.n, circle.c) - line.c) )
     )
 

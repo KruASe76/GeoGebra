@@ -2,17 +2,28 @@ import os
 
 from construction import *
 
-import ggb_parser
 import short_parser
+import ggb_parser
 import draw
 
 #--------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    #construction = ggb_parser.load("somefile.txt")
-    construction = ggb_parser.load("somefile.ggb")
+    #construction = shortpy_parser.load("shortpy_test.txt")
+    #construction = short_parser.load("short_test.txt")
+    #construction = ggb_parser.load("test.ggb")
 
-    #здесь можно менять construction, запускать визуализацию и тп
+    construction = Construction()
+
+    construction.add(Var("x", 5))
+    #construction.add(Var("y", "x + 5"))
+    construction.add(Command("Assign", Expression("x + 5"), "y"))
+
+    construction.add(Command("Point", ["x", "y"], "Smth"))
+    construction.add(Command("Point", [1.5, 2], "A"))
+    construction.add(Command("Point", ["XCoord(Smth)", "YCoord(Smth) + 2"], "B"))
+
+    #...
 
     short_parser.save(construction, "somefile.txt")
 
