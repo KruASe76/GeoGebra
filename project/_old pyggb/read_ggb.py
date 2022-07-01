@@ -73,7 +73,7 @@ type_to_shortcut = {
     Segment   : 's',
     Angle     : 'a',
     AngleSize : 'A',
-    Vector    : 'v',
+    Vector    : 'v'
 }
 
 def command_types_name(name, params):

@@ -1,7 +1,7 @@
 from lib_vars import *
 from lib_elements import *
-from lib_expressions import *
 from lib_commands import *
+from lib_expressions import *
 
 #--------------------------------------------------------------------------
 
@@ -9,7 +9,6 @@ class Construction:
     def __init__(self):
         self.vars = []
         self.elements = []
-        self.expressions = []
         self.commands = []
 
     def add(self, var):
@@ -20,6 +19,7 @@ class Construction:
 
     def add(self, command):
         self.commands.append(command)
+        
 
     def rebuild(self):
         for command in self.commands: self.apply(command)

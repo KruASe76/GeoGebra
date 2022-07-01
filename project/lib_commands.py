@@ -38,6 +38,13 @@ type_to_shortcut = {
 def command_types_name(name, params):
     return "{}_{}".format(name, ''.join(type_to_shortcut[type(x)] for x in params))
 
+def tweak_command_name(name): # "AreCollinear" -> "are_collinear"
+    altered_name = [name[0].lower()]
+    for x in name[1:]:
+        if x.isupper(): altered_name+=['_', x.lower()]
+        else: altered_name.append(x)
+    return ''.join(altered_name)
+
 #--------------------------------------------------------------------------
 
 def angle_ppp(p1, p2, p3):
