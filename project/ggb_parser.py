@@ -20,30 +20,6 @@ type_set = set()
 
 #--------------------------------------------------------------------------
 
-def tweak_command_name(name): # "AreCollinear" -> "are_collinear"
-    altered_name = [name[0].lower()]
-    for x in name[1:]:
-        if x.isupper(): altered_name+=['_', x.lower()]
-        else: altered_name.append(x)
-    return ''.join(altered_name)
-
-def apply_command(name, params):
-    name_with_types = command_types_name(name, params)
-    if name_with_types in command_dict: name = name_with_types
-    elif name not in command_dict:
-        raise Exception("Command '{}' not found".format(name_with_types))
-
-    f = command_dict[name]
-
-    result = f(*params)
-    if not isinstance(result, (tuple, list)): result = (result,)
-    try:
-        for res in result:
-            assert(type(res) in type_to_shortcut)
-    except:
-        raise Exception("Command '{}' returned an unsupported type {}".format(name, type(res)))
-    return result
-
 def xml_element(node):
     t = node.attrib["type"]
     label = node.attrib["label"]

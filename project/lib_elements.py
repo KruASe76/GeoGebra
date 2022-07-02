@@ -1,4 +1,3 @@
-import cairo
 import numpy as np
 
 #--------------------------------------------------------------------------
@@ -7,6 +6,9 @@ class Element:
     def __init__(self, name, data = None):
         self.name = name
         self.data = data
+
+    def __repr__(self):
+        return "{}: {}".format(self.name, self.data)
 
     def drawable(self):
         return isinstance(self.data, (Point, Line, Angle, Polygon, Circle, Vector))
