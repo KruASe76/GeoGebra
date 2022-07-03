@@ -1,25 +1,31 @@
 import os
+import cairo
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 
-import construction
+from lib_vars import *
+from lib_elements import *
+from lib_commands import *
+from lib_expressions import *
+
+from construction import *
 
 #--------------------------------------------------------------------------
 
 class DisplayWindow(Gtk.Window):
 
-    def __init__(self, width, height, datadir):
+    def __init__(self, width, height, construction):
         super(DisplayWindow, self).__init__()
 
-        self.datadir = datadir
-        self.fnames = sorted([
-            fname for fname in os.listdir(datadir)
-            if fname.endswith(".txt")
-        ])
-        self.index = 0
-        self.construction = construction.Construction(display_size = (width, height))
-        self.load_construction()
+        self.construction = construction
+        self.construction.rebuild()
+
+        self.oxy = [width / 2, height / 2]
+        self.scale = min(width / 8, height / 8)
+        self.size = [width, height]
+
+        #далее внутренние аттрибуты Gtk.Window
 
         self.darea = Gtk.DrawingArea()
         self.darea.connect("draw", self.on_draw)
@@ -33,38 +39,31 @@ class DisplayWindow(Gtk.Window):
         self.set_position(Gtk.WindowPosition.CENTER)
         self.connect("delete-event", Gtk.main_quit)
         self.show_all()
+    
+    def X(self, value):
+        return value * self.scale + self.oxy[0]
+    def Y(self, value):
+        return value * self.scale + self.oxy[1]
 
-    def load_construction(self):
-        if self.index == len(self.fnames): self.index = 0
-        elif self.index < 0: self.index += len(self.fnames)
-        fname = self.fnames[self.index]
-        print(self.index, fname)
-        self.construction.load(os.path.join(self.datadir, fname))
-        self.construction.generate(max_attempts = 0)
+    def on_draw(self, w, cr):
+        for element in self.construction.elements:
+            if type(element.data) == Point:
+                x = self.X(element.data.a[0])
+                y = self.Y(element.data.a[1])
+                cr.arc(x, y, 3, 0, 2 * np.pi)
+                cr.fill()
 
-    def on_draw(self, wid, cr):
+    def on_key_press(self, w, e):
+        keyval_name = Gdk.keyval_name(e.keyval)
+        print(keyval_name)
 
-        self.construction.render(cr)
-
-    def on_key_press(self,w,e):
-
-        keyval = e.keyval
-        keyval_name = Gdk.keyval_name(keyval)
-        #print(keyval_name)
-        regenerate = False
-        if keyval_name in ("Up", "Down", "Left", "Right"):
-            regenerate = True
-            if keyval_name in ("Up", "Left"): self.index -= 1
-            else: self.index += 1
-            self.load_construction()
-            
-        elif keyval_name == "space":
-            regenerate = True
+        if  keyval_name == "space":
+            rebuild = True
         elif keyval_name == "Escape":
             Gtk.main_quit()
         else:
             return False
 
-        if regenerate:
-            self.construction.generate(max_attempts = 0)
+        if rebuild:
+            self.construction.rebuild()
             self.darea.queue_draw()

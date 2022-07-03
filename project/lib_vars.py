@@ -6,9 +6,9 @@ class Var:
     def __init__(self, name, data = None):
         self.name = name
         self.data = data
-        
+
     def __repr__(self):
-        return "{}: {}".format(self.name, self.data)
+        return "{}:\t{}".format(self.name, self.data)
 
 #--------------------------------------------------------------------------
 

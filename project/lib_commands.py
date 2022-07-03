@@ -15,18 +15,23 @@ class Command:
     def __repr__(self):
         inputs_str = ' '.join([obj.name if hasattr(obj, "name") else str(obj) for obj in self.inputs])
         outputs_str = ' '.join([obj.name if hasattr(obj, "name") else str(obj) for obj in self.outputs])
-        return "{}: {} >> {}".format(self.name, inputs_str, outputs_str)
+        return "{}:\t{}\t>> {}".format(self.name, inputs_str, outputs_str)
 
     def checkParamsPrepaired(self, params):
         for obj in params:
-            if type_to_shortcut[type(obj)] is not None:
-                raise Exception("In command <{}> param ({} as {}) is not prepaired.".format(self.name, obj, type(obj)))
+            if type(obj) not in type_to_shortcut:
+                #raise Exception("In command <{}> param ({} as {}) is not prepaired.".format(self.name, obj, type(obj)))
+                return False
+        return True
 
     def func(self):     # эта функция должна находить реализованную функцию в этом модуле и возвращать ссылку на нее
-        self.checkParamsPrepaired(self.inputs)
+        #if not self.checkParamsPrepaired(self.inputs):
+        #    raise Exception("In command <{}> inputs are not prepaired.".format(self.name))
 
         fname = strFullCommand(self.name, self.inputs)
-        #...
+
+        if fname in globals(): return globals()[fname]
+        else: return None
 
 #--------------------------------------------------------------------------        
 
@@ -49,6 +54,7 @@ type_to_shortcut = {
     Vector    : 'v',
 
     int       : 'i',
+    float     : 'i',
     Boolean   : 'b',
     Measure   : 'm',
     AngleSize : 'A'
@@ -58,7 +64,7 @@ def strFullCommand(name, params): # "Polygon", [Point, Point, int] -> "polygon_p
     return "{}_{}".format(strCommand(name), strParams(params))
 
 def strParams(params): # [Point, Point, int] -> "ppi"
-    return ''.join(type_to_shortcut[type(x)] for x in params)
+    return ''.join(type_to_shortcut[type(x)] if type(x) in type_to_shortcut else '?' for x in params)
 
 def strCommand(name): # "AreCollinear" -> "are_collinear"
     altered_name = [name[0].lower()]
@@ -290,14 +296,14 @@ def intersect_lc(line, circle):
 
     # shift circle to center
     y = line.c - np.dot(line.n, circle.c)
-    x_squared = circle.r_squared - y**2
-    if np.isclose(x_squared, 0): return Point(y*line.n + circle.c)
+    x_squared = circle.r_squared - y ** 2
+    if np.isclose(x_squared, 0): return Point(y * line.n + circle.c)
     assert(x_squared > 0)
 
     x = np.sqrt(x_squared)
     return [
-        Point(x*line.v + y*line.n + circle.c),
-        Point(-x*line.v + y*line.n + circle.c),
+        Point(x * line.v + y * line.n + circle.c),
+        Point(-x * line.v + y * line.n + circle.c),
     ]
 
 def intersect_cc(circle1, circle2):
@@ -305,11 +311,11 @@ def intersect_cc(circle1, circle2):
     center_dist_squared = np.dot(center_diff, center_diff)
     center_dist = np.sqrt(center_dist_squared)
     relative_center = (circle1.r_squared - circle2.r_squared) / center_dist_squared
-    center = (circle1.c + circle2.c)/2 + relative_center*center_diff/2
+    center = (circle1.c + circle2.c) / 2 + relative_center*center_diff / 2
 
     rad_sum  = circle1.r + circle2.r
     rad_diff = circle1.r - circle2.r
-    det = (rad_sum**2 - center_dist_squared) * (center_dist_squared - rad_diff**2)
+    det = (rad_sum ** 2 - center_dist_squared) * (center_dist_squared - rad_diff ** 2)
     if np.isclose(det, 0): return [Point(center)]
     assert(det > 0)
     center_deviation = np.sqrt(det)
@@ -317,7 +323,7 @@ def intersect_cc(circle1, circle2):
 
     return [
         Point(center + center_dev)
-        for center_dev in center_deviation * 0.5*vector_perp_rot(center_diff) / center_dist_squared
+        for center_dev in center_deviation * 0.5 * vector_perp_rot(center_diff) / center_dist_squared
     ]
 
 def intersect_cl(c,l):
@@ -373,23 +379,23 @@ def intersect_ss(s1, s2):
     return result
 
 def line_bisector_pp(p1, p2):
-    p = (p1.a+p2.a)/2
-    n = p2.a-p1.a
+    p = (p1.a + p2.a) / 2
+    n = p2.a - p1.a
     assert((n != 0).any())
-    return Line(n, np.dot(n,p))
+    return Line(n, np.dot(n, p))
 
 def line_bisector_s(segment):
     p1, p2 = segment.end_points
-    p = (p1+p2)/2
-    n = p2-p1
-    return Line(n, np.dot(n,p))
+    p = (p1 + p2) / 2
+    n = p2 - p1
+    return Line(n, np.dot(n, p))
 
 def line_pl(point, line):
     return Line(line.n, np.dot(line.n, point.a))
 
 def line_pp(p1, p2):
     assert((p1.a != p2.a).any())
-    n = vector_perp_rot(p1.a-p2.a)
+    n = vector_perp_rot(p1.a - p2.a)
     return Line(n, np.dot(p1.a, n))
 
 def line_pr(point, ray):
@@ -403,7 +409,7 @@ def midpoint_pp(p1, p2):
 
 def midpoint_s(segment):
     p1, p2 = segment.end_points
-    return Point((p1+p2)/2)
+    return Point((p1 + p2) / 2)
 
 def minus_a(angle):
     return AngleSize(-angle.angle)
@@ -416,27 +422,27 @@ def minus_m(m):
 
 def minus_mm(m1, m2):
     assert(m1.dim == m2.dim)
-    return Measure(m1.x-m2.x, m1.dim)
+    return Measure(m1.x - m2.x, m1.dim)
 
 def minus_ms(m, s):
     assert(m.dim == 1)
-    return Measure(m.x-s.length, 1)
+    return Measure(m.x - s.length, 1)
 
 def minus_sm(s, m):
     assert(m.dim == 1)
-    return Measure(s.length-m.x, 1)
+    return Measure(s.length - m.x, 1)
 
 def minus_ss(s1, s2):
-    return Measure(s1.length-s2.length, 1)
+    return Measure(s1.length - s2.length, 1)
 
 def mirror_cc(circle, by_circle):
     center_v = circle.c - by_circle.c
     denom = square_norm(center_v) - circle.r_squared
     if np.isclose(denom, 0):
-        return Line(center_v, circle.r_squared/2 + np.dot(center_v, by_circle.c))
+        return Line(center_v, circle.r_squared / 2 + np.dot(center_v, by_circle.c))
     else:
         return Circle(
-            center = (by_circle.r_squared/denom)*center_v + by_circle.c,
+            center = (by_circle.r_squared/denom) * center_v + by_circle.c,
             r = by_circle.r_squared * circle.r / abs(denom)
         )
 
@@ -448,27 +454,27 @@ def mirror_cl(circle, by_line):
 
 def mirror_cp(circle, by_point):
     return Circle(
-        center = 2*by_point.a - circle.c,
+        center = 2 * by_point.a - circle.c,
         r = circle.r
     )
 
 def mirror_ll(line, by_line):
-    n = line.n - by_line.n * 2*np.dot(line.n, by_line.n)
-    return Line(n, line.c + 2*by_line.c * np.dot(n, by_line.n) )
+    n = line.n - by_line.n * 2 * np.dot(line.n, by_line.n)
+    return Line(n, line.c + 2 * by_line.c * np.dot(n, by_line.n) )
 
 def mirror_lp(line, by_point):
-    return Line(line.n, 2*np.dot(by_point.a, line.n) - line.c)
+    return Line(line.n, 2 * np.dot(by_point.a, line.n) - line.c)
 
 def mirror_pc(point, by_circle):
     v = point.a - by_circle.c
-    assert(not np.isclose(v,0).all())
+    assert(not np.isclose(v, 0).all())
     return Point(by_circle.c + v * (by_circle.r_squared / square_norm(v)) )
 
 def mirror_pl(point, by_line):
-    return Point(point.a + by_line.n*2*(by_line.c - np.dot(point.a, by_line.n)))
+    return Point(point.a + by_line.n * 2 * (by_line.c - np.dot(point.a, by_line.n)))
 
 def mirror_pp(point, by_point):
-    return Point(2*by_point.a - point.a)
+    return Point(2 * by_point.a - point.a)
 
 def mirror_ps(point, segment):
     return mirror_pl(point, segment)
@@ -485,6 +491,9 @@ def orthogonal_line_ps(point, segment):
 def point_():
     return Point(np.random.normal(size = 2))
 
+def point_ii(x, y):
+    return Point([x,y])
+
 def point_c(circle):
     return Point(circle.c + circle.r * random_direction())
 
@@ -500,15 +509,15 @@ def polar_pc(point, circle):
     return Line(n, np.dot(n, circle.c) + circle.r_squared)
 
 def polygon_ppi(p1, p2, n):
-    p1c,p2c = (a_to_cpx(p.a) for p in (p1,p2))
-    alpha = 2*np.pi/n
-    center = p2c + (p1c-p2c)/(1-np.exp(-alpha*1j))
-    v = p2c-center
-    points = [Point(cpx_to_a(center + v*np.exp(i*alpha*1j))) for i in range(1,n-1)]
-    raw_points = [p.a for p in [p1,p2]+points]
+    p1c, p2c = (a_to_cpx(p.a) for p in (p1, p2))
+    alpha = 2 * np.pi/n
+    center = p2c + (p1c-p2c)/(1-np.exp(-alpha * 1j))
+    v = p2c - center
+    points = [Point(cpx_to_a(center + v * np.exp(i * alpha * 1j))) for i in range(1, n - 1)]
+    raw_points = [p.a for p in [p1, p2] + points]
     segments = [
         Segment(p1, p2)
-        for p1,p2 in zip(raw_points, raw_points[1:] + raw_points[:1])
+        for p1, p2 in zip(raw_points, raw_points[1:] + raw_points[:1])
     ]
     return [Polygon(raw_points)] + segments + points
 
@@ -516,7 +525,7 @@ def polygon(*points):
     raw_points = [p.a for p in points]
     segments = [
         Segment(p1, p2)
-        for p1,p2 in zip(raw_points, raw_points[1:] + raw_points[:1])
+        for p1, p2 in zip(raw_points, raw_points[1:] + raw_points[:1])
     ]
     return [Polygon(raw_points)] + segments
 
@@ -546,19 +555,19 @@ def product_fm(f, m):
     return product_mf(m, f)
 
 def product_ff(f1, f2):
-    return Measure(f1*f2, 0)
+    return Measure(f1 * f2, 0)
 
 def product_iA(i, angle_size):
     return AngleSize(angle_size.x * i)
 
 def product_im(i, m):
-    return Measure(i*m.x, m.dim)
+    return Measure(i * m.x, m.dim)
 
 def product_is(i, s):
-    return Measure(i*s.length, 1)
+    return Measure(i * s.length, 1)
 
 def product_if(i, f):
-    return Measure(i*f, 0)
+    return Measure(i * f, 0)
 
 def prove_b(x):
     print(x.b)
@@ -594,7 +603,7 @@ def ratio_ii(i1, i2):
     return Measure(i1 / i2, 0)
 
 def ray_pp(p1, p2):
-    return Ray(p1.a, p2.a-p1.a)
+    return Ray(p1.a, p2.a - p1.a)
 
 def rotate_pap(point, angle, by_point):
     return Point(by_point.a + rotate_vec(point.a - by_point.a, angle.angle))
@@ -608,8 +617,8 @@ def segment_pp(p1, p2):
 def semicircle(p1, p2):
     vec = a_to_cpx(p1.a - p2.a)
     return Arc(
-        (p1.a + p2.a)/2,
-        abs(vec)/2,
+        (p1.a + p2.a) / 2,
+        abs(vec) / 2,
         [np.angle(v) for v in (-vec, vec)]
     )
 
@@ -637,7 +646,7 @@ def tangent_pc(point, circle):
 
 def touches_cc(c1, c2):
     lens = c1.r, c2.r, np.linalg.norm(c1.c-c2.c)
-    return Boolean(np.isclose(sum(lens), 2*max(lens)))
+    return Boolean(np.isclose(sum(lens), 2 * max(lens)))
 
 def touches_lc(line, circle):
     return Boolean(

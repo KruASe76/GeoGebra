@@ -8,7 +8,7 @@ class Element:
         self.data = data
 
     def __repr__(self):
-        return "{}: {}".format(self.name, self.data)
+        return "{}:\t{}".format(self.name, self.data)
 
     def drawable(self):
         return isinstance(self.data, (Point, Line, Angle, Polygon, Circle, Vector))
@@ -49,7 +49,8 @@ def rotate_vec(vec, alpha):
 
 class Point:
     def __init__(self, a):
-        self.a = np.array(a)
+        self.a = np.array(a, dtype = float)
+
     def __repr__(self): return "Point({}, {})".format(self.a[0], self.a[1])
     def draw(self, cr, corners):
         cr.arc(self.a[0], self.a[1], 3, 0, 2*np.pi)
@@ -81,10 +82,10 @@ class Line:
     def scale(self, ratio):
         self.c *= ratio
     def important_points(self):
-        return [self.n*self.c]
+        return [self.n * self.c]
 
     def __repr__(self):
-        return "Line(n=({}  {}) c={})".format(self.n[0], self.n[1], self.c)
+        return "Line(n=({}, {}) c={})".format(self.n[0], self.n[1], self.c)
 
     def equivalent(self, other):
         if not isinstance(other, Line): return False
@@ -95,7 +96,6 @@ class Line:
         return False
 
     def get_endpoints(self, corners):
-
         result = [None, None]
         boundaries = list(zip(*corners))
         if np.prod(self.n) > 0:
@@ -135,11 +135,11 @@ class Line:
 class Segment(Line):
     def __init__(self, p1, p2): # [x,y] in Line([a,b],c) <=> xa + yb == c
         assert((p1 != p2).any())
-        normal_vec = vector_perp_rot(p1-p2)
+        normal_vec = vector_perp_rot(p1 - p2)
         c = np.dot(p1, normal_vec)
         Line.__init__(self, normal_vec, c)
         self.end_points = np.array([p1, p2])
-        self.length = np.linalg.norm(p1-p2)
+        self.length = np.linalg.norm(p1 - p2)
 
     def translate(self, vec):
         self.c += np.dot(vec, self.n)

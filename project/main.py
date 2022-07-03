@@ -1,10 +1,19 @@
-import os
+import lib_vars
+import lib_elements
+import lib_commands
+import lib_expressions
+
+from lib_vars import *
+from lib_elements import *
+from lib_commands import *
+from lib_expressions import *
 
 from construction import *
 
 #import short_parser
 #import ggb_parser
-#import draw
+
+import draw_simple
 
 #--------------------------------------------------------------------------
 
@@ -24,13 +33,22 @@ if __name__ == "__main__":
     constr.add(Command("Point", [1.5, 2], "B"))
     constr.add(Command("Line", ["A", "B"], "l"))
 
-    #constr.rebuild()
+    constr.add(Command("Circle", ["A", "B"], "ω"))
+    constr.add(Command("Intersect", ["ω", "l"], ["C", "D"]))
 
-    print(constr)
+    constr.add(Command("OrthogonalLine", ["A", "l"], "l2"))
+    constr.add(Command("Intersect", ["l2", "ω"], ["E", "F"]))
+    
+    print("BEFORE:\n" + str(constr))
 
-    #construction.add(Command("Point", ["XCoord(Smth)", "YCoord(Smth) + 2"], "B"))
+    constr.rebuild()
+
+    print("AFTER:\n" + str(constr))
+
+    #constr.add(Command("Point", ["XCoord(Smth)", "YCoord(Smth) + 2"], "B"))
 
     #...
 
     #short_parser.save(construction, "somefile.txt")
 
+    draw_simple.Show(constr)

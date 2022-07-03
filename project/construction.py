@@ -1,5 +1,5 @@
 import numpy as np
-import cmath
+
 
 from lib_vars import *
 from lib_elements import *
@@ -15,15 +15,15 @@ class Construction:
         self.commands = []
 
     def __repr__(self):
-        str_out = "-- construction: --\n"
+        str_out = "-------------------\n[[construction]]:\n"
 
-        str_out += "----- vars ({}):".format(len(self.vars)) + '\n'
+        str_out += "\n[{} vars]:".format(len(self.vars)) + '\n'
         for var in self.vars: str_out += str(var) + '\n'
        
-        str_out += "----- elements ({}):".format(len(self.elements)) + '\n'
+        str_out += "\n[{} elements]:".format(len(self.elements)) + '\n'
         for element in self.elements: str_out += str(element) + '\n'
         
-        str_out += "----- commands ({}):".format(len(self.commands)) + '\n'
+        str_out += "\n[{} commands]:".format(len(self.commands)) + '\n'
         for command in self.commands: str_out += str(command) + '\n'
 
         str_out += "-------------------\n"
@@ -52,44 +52,50 @@ class Construction:
             if element.name is name: obj = element
         return obj
 
-    def objectByStr(self, text):
-        findByName = self.objectByName(text)
-        if findByName is not None: return findByName
+    def dataByStr(self, text):
+        obj = self.objectByName(text)
+        if obj is not None: return obj.data
 
-        if not cmath.isnan(text): return float(text)
+        if is_number(text): return float(text)
 
-        raise Exception("{}: not found variable(s) or not processing".format(text))
+        #raise Exception("Not found object(s) '{}' or not processing".format(text))
         return None
 
-    def prepareInOut(self, command):
+    def prepareInputs(self, command):
         for i in range(len(command.inputs)):
             if isinstance(command.inputs[i], str):
-                command.inputs[i] = self.objectByStr(command.inputs[i])
-        
-        for i in range(len(command.outputs)):
-            if isinstance(command.outputs[i], str):
-                command.outputs[i] = self.objectByStr(command.outputs[i]) 
+                command.inputs[i] = self.dataByStr(command.inputs[i])
 
     def rebuild(self):
         for command in self.commands: self.apply(command)
 
     def apply(self, command):
-        self.prepareInOut(command)
+        self.prepareInputs(command)
         input_data = [obj.data if hasattr(obj,"data") else obj for obj in command.inputs]
 
         f = command.func()
 
-        output_data = f(*input_data)
-        if not isinstance(output_data, list): output_data = [output_data]
+        if f is not None:
+            output_data = f(*input_data)
+            if not isinstance(output_data, list): output_data = [output_data]
+            print("{}: {} >> {}".format(f.__name__, output_data, command.outputs))
 
-        # здесь должна быть проверка выходных данных output_data и запись соответствующих данных в command.outputs
-        # проверка производится по количеству данных, по типу, сравнение с None(нужно ли?)
-        # ...
+            # здесь идет проверка выходных данных output_data и запись соответствующих данных в command.outputs
 
-        '''
-        assert(len(output_data) == len(command.outputs))
-        for data_from, obj_to in zip(output_data, command.outputs):
-            if hasattr(obj_to, "data"): obj_to.data = data_from
-            else: obj_to = data_from
-        
-        '''
+            for i in range(len(output_data)):
+                if i < len(command.outputs) and output_data[i] is not None:
+                    if self.objectByName(command.outputs[i]) is None:
+                        if isinstance(output_data[i], (Point, Line, Angle, Polygon, Circle, Vector)):
+                            self.add(Element(command.outputs[i], output_data[i]))
+                        elif isinstance(output_data[i], (int, float, Boolean, Measure, AngleSize)):
+                            self.add(Var(command.outputs[i], output_data[i]))
+                    else:
+                        self.objectByName(command.outputs[i]).data = output_data[i]
+
+
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
