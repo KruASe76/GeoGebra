@@ -69,7 +69,13 @@ class Construction:
     def rebuild(self):
         for command in self.commands: self.apply(command)
 
-    def apply(self, command):
+    def copy(self, command):
+        assert(isinstance(command, Command))
+        command_copy = Command(command.name, command.inputs.copy(), command.outputs.copy())
+        return command_copy
+
+    def apply(self, command_original):
+        command = self.copy(command_original)
         self.prepareInputs(command)
         input_data = [obj.data if hasattr(obj,"data") else obj for obj in command.inputs]
 

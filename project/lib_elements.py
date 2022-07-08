@@ -3,9 +3,10 @@ import numpy as np
 #--------------------------------------------------------------------------
 
 class Element:
-    def __init__(self, name, data = None):
+    def __init__(self, name, data = None, visible = True):
         self.name = name
         self.data = data
+        self.visible = visible
 
     def __repr__(self):
         return "{}:\t{}".format(self.name, self.data)
@@ -14,9 +15,6 @@ class Element:
         return isinstance(self.data, (Point, Line, Angle, Polygon, Circle, Vector))
     def draw(self, cr, corners):
         if self.drawable(): self.data.draw(cr, corners)
-    def important_points(self):
-        if self.drawable(): return self.data.important_points()
-        else: return []
 
     def has_value(self):
         return isinstance(self.data, (Measure, Boolean, AngleSize, Angle, Segment, Polygon))
@@ -138,6 +136,7 @@ class Segment(Line):
         normal_vec = vector_perp_rot(p1 - p2)
         c = np.dot(p1, normal_vec)
         Line.__init__(self, normal_vec, c)
+        
         self.end_points = np.array([p1, p2])
         self.length = np.linalg.norm(p1 - p2)
 

@@ -24,31 +24,57 @@ if __name__ == "__main__":
 
     constr = Construction()
 
-    constr.add(Var("x", 5))
-    constr.add(Var("y", 7))
-    #construction.add(Var("y", "x + 5"))
-    #construction.add(Command("Assign", Expression("x + 5"), "y"))
+    # длины сторон треугольника a, b, c
+    constr.add(Var("a", 6.5))
+    constr.add(Var("b", 8))
+    constr.add(Var("c", 4))
 
-    constr.add(Command("Point", ["x", "y"], "A"))
-    constr.add(Command("Point", [1.5, 2], "B"))
+    # треугольник ABC по трем сторонам a, b, c
+    constr.add(Command("Point", ["0", "0"], "A"))
+    constr.add(Command("Point", ["c", "0"], "B"))
+    constr.add(Command("Circle", ["A", "b"], "ω1"))
+    constr.add(Command("Circle", ["B", "a"], "ω2"))
+    constr.add(Command("Intersect", ["ω1", "ω2"], "C"))
+    constr.add(Command("Polygon", ["A", "B", "C"], "triang")) #пока не создается
+    constr.add(Command("Segment", ["A", "B"], "s1"))
+    constr.add(Command("Segment", ["B", "C"], "s2"))
+    constr.add(Command("Segment", ["A", "C"], "s3"))
+
+    # центр вписанной окружности для треугольника ABC
+    constr.add(Command("AngularBisector", ["C", "A", "B"], "l1"))
+    constr.add(Command("AngularBisector", ["C", "B", "A"], "l2"))
+    constr.add(Command("Intersect", ["l1", "l2"], "O"))
+    
+    # вписанная окружность треугольника ABC
     constr.add(Command("Line", ["A", "B"], "l"))
-
-    constr.add(Command("Circle", ["A", "B"], "ω"))
-    constr.add(Command("Intersect", ["ω", "l"], ["C", "D"]))
-
-    constr.add(Command("OrthogonalLine", ["A", "l"], "l2"))
-    constr.add(Command("Intersect", ["l2", "ω"], ["E", "F"]))
+    constr.add(Command("OrthogonalLine", ["O", "l"], "h"))
+    constr.add(Command("Intersect", ["h", "l"], "H"))
+    constr.add(Command("Circle", ["O", "H"], "ω"))
     
     print("BEFORE:\n" + str(constr))
 
     constr.rebuild()
 
+    constr.elementByName("ω1").visible = False
+    constr.elementByName("ω2").visible = False
+    constr.elementByName("l1").visible = False
+    constr.elementByName("l2").visible = False
+    constr.elementByName("l").visible = False
+    constr.elementByName("h").visible = False
+    constr.elementByName("H").visible = False
+
     print("AFTER:\n" + str(constr))
 
-    #constr.add(Command("Point", ["XCoord(Smth)", "YCoord(Smth) + 2"], "B"))
 
-    #...
 
-    #short_parser.save(construction, "somefile.txt")
+    draw_simple.Add(constr)
 
-    draw_simple.Show(constr)
+    constr.varByName("c").data = 10
+    constr.rebuild()
+    draw_simple.Add(constr)
+
+    constr.varByName("c").data = 13
+    constr.rebuild()
+    draw_simple.Add(constr)
+
+    draw_simple.Show()

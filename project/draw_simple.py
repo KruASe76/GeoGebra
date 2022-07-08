@@ -10,7 +10,7 @@ from construction import *
 
 #--------------------------------------------------------------------------
 
-def Show(constr):
+def Add(constr):
     figure, axes = plt.subplots()
     axes.set_aspect(1)
     axes.set(xlim=(-10, 20), ylim = (-10, 20))
@@ -21,12 +21,14 @@ def Show(constr):
 
     # отрисовка элементов
     for el in constr.elements:
+        if not el.visible: continue
+
         if type(el.data) == Point:
             plt.scatter(el.data.a[0], el.data.a[1])
             plt.text(el.data.a[0], el.data.a[1], el.name) #, bbox = dict(facecolor="white",alpha=0.5))
 
         elif type(el.data) == Line:
-            if el.data.n[1] is not 0:
+            if el.data.n[1] != 0:
                 k = -el.data.n[0] / el.data.n[1]
                 b = el.data.c / el.data.n[1]
                 x = np.linspace(-20, 20, 100)
@@ -38,8 +40,13 @@ def Show(constr):
                 x = k * y + b
             plt.plot(x, y)
 
+        elif type(el.data) == Segment:
+            xx = [el.data.end_points[0][0], el.data.end_points[1][0]]
+            yy = [el.data.end_points[0][1], el.data.end_points[1][1]]
+            plt.plot(xx, yy, 'bo', linestyle="-")
+
         elif type(el.data) == Circle:
             axes.add_artist(plt.Circle((el.data.c[0], el.data.c[1]), el.data.r, fill = False))
 
-
+def Show():
     plt.show()

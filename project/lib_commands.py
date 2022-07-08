@@ -240,6 +240,9 @@ def circle_pm(p, m):
     assert(m.dim == 1)
     return Circle(p.a, m.x)
 
+def circle_pi(p, i):
+    return Circle(p.a, i)
+
 def circle_ps(p, s):
     return Circle(p.a, s.length)
 
