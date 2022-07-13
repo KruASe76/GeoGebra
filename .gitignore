@@ -1,6 +1,7 @@
-/__pycache__
+__pycache__/
+
 /docs
 /README.rst
 /.DS_Store
 
-/**temp**
+**temp**

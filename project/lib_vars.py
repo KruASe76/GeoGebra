@@ -1,5 +1,7 @@
 import numpy as np
 
+from lib_elements import Angle
+
 #--------------------------------------------------------------------------
 
 class Var:

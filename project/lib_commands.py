@@ -1,5 +1,6 @@
 import numpy as np
 from inspect import getmembers, isfunction
+from typing import Iterable
 
 from lib_vars import *
 from lib_elements import *
@@ -37,7 +38,7 @@ class Command:
 
 def toObjArray(params):
     if params == None: return []
-    elif not isinstance(params, list): return [params]
+    elif not isinstance(params, Iterable) or isinstance(params, str): return [params]
     else: return params
 
 #--------------------------------------------------------------------------   
@@ -130,7 +131,7 @@ def are_concurrent(o1, o2, o3):
             cand = intersect_cc(o1, o2)
     except: pass
 
-    if not isinstance(cand, (tuple,list)): cand = [cand]
+    if not isinstance(cand, Iterable) or isinstance(cand, str): cand = (cand,)
 
     for p in cand:
         for obj in (o1,o2,o3):
@@ -334,12 +335,12 @@ def intersect_cl(c,l):
 
 def intersect_Cl(arc, line):
     results = intersect_lc(line,arc)
-    if not isinstance(results, (tuple, list)): results = (results,)
+    if not isinstance(results, Iterable) or isinstance(results, str): results = (results,)
     return [x for x in results if arc.contains(x.a)]
 
 def intersect_cs(circle, segment):
     results = intersect_lc(segment, circle)
-    if not isinstance(results, (tuple, list)): results = (results,)
+    if not isinstance(results, Iterable) or isinstance(results, str): results = (results,)
     return [x for x in results if segment.contains(x.a)]
 
 def intersect_lr(line, ray):
@@ -643,7 +644,7 @@ def sum_ss(s1, s2):
 def tangent_pc(point, circle):
     polar = polar_pc(point, circle)
     intersections = intersect_lc(polar, circle)
-    if type(intersections) in (tuple, list) and len(intersections) == 2:
+    if isinstance(intersections, Iterable) and not isinstance(intersections, str) and len(intersections) == 2:
         return [line_pp(point, x) for x in intersections]
     else: return polar
 

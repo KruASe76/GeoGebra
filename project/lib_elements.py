@@ -1,5 +1,7 @@
 import numpy as np
 
+from lib_vars import *
+
 #--------------------------------------------------------------------------
 
 class Element:
