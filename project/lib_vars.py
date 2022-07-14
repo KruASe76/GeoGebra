@@ -34,7 +34,7 @@ class AngleSize:
     def __init__(self, x):
         self.value = x
     def __repr__(self):
-        return "AngleSize({}°)".format(self.value/np.pi * 180)
+        return "AngleSize({}°)".format(self.value * 180 / np.pi)
 
     def translate(self, vec):
         pass
@@ -45,6 +45,10 @@ class AngleSize:
         if isinstance(other, Angle): return np.isclose(self.value, other.angle)
         if isinstance(other, AngleSize): return np.isclose(self.value, other.value)
         return False
+
+def AngleSizeFromDegrees(text):
+    assert(text[-1] == '°')
+    return AngleSize(float(text[:-1]) * np.pi / 180)
 
 class Boolean:
     def __init__(self, b):

@@ -36,20 +36,20 @@ class Construction:
 
     def varByName(self, name):
         for var in self.vars:
-            if var.name is name: return var
+            if var.name == name: return var
         return None
 
     def elementByName(self, name):
         for element in self.elements:
-            if element.name is name: return element
+            if element.name == name: return element
         return None
 
     def objectByName(self, name):
         obj = None
         for var in self.vars:
-            if var.name is name: obj = var
+            if var.name == name: obj = var
         for element in self.elements:
-            if element.name is name: obj = element
+            if element.name == name: obj = element
         return obj
 
     def dataByStr(self, text):
@@ -57,6 +57,8 @@ class Construction:
         if obj is not None: return obj.data
 
         if is_number(text): return float(text)
+
+        if is_angle_degrees(text): return AngleSizeFromDegrees(text)
 
         #raise Exception("Not found object(s) '{}' or not processing".format(text))
         return None
@@ -97,6 +99,8 @@ class Construction:
                             self.add(Var(command.outputs[i], output_data[i]))
                     else:
                         self.objectByName(command.outputs[i]).data = output_data[i]
+        else:
+            print("NONE {}: {}".format(strFullCommand(command.name, command.inputs), command.inputs))
 
 
 def is_number(s):
@@ -104,4 +108,12 @@ def is_number(s):
         float(s)
         return True
     except ValueError:
+        return False
+
+def is_angle_degrees(s):
+    try:
+        assert(s[-1] == '°')
+        float(s[:-1])
+        return True
+    except:
         return False

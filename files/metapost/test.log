@@ -1,0 +1,20 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=mptopdf 2020.1.19)  14 JUL 2022 13:45
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**\relax test.1
+ (./test.1) [1] 
+Here is how much of TeX's memory you used:
+ 73 strings out of 496703
+ 517 string characters out of 6201007
+ 4040794 words of memory out of 9026001
+ 1731 multiletter control sequences out of 15000+600000
+ 7 words of font info for 0 fonts, out of 8000000 for 9000
+ 0 hyphenation exceptions out of 8191
+ 10i,3n,7p,120b,262s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on test.pdf (1 page, 4724 bytes).
+PDF statistics:
+ 8 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 7 words of extra memory for PDF output out of 10000 (max. 10000000)
+

@@ -1,4 +1,5 @@
 import numpy as np
+import re
 from inspect import getmembers, isfunction
 from typing import Iterable
 
@@ -62,7 +63,10 @@ type_to_shortcut = {
 }
 
 def strFullCommand(name, params): # "Polygon", [Point, Point, int] -> "polygon_ppi"
-    return "{}_{}".format(strCommand(name), strParams(params))
+    if strCommand(name) == "polygon" and bool(re.match('^p*$', strParams(params))):
+        return strCommand(name)
+    else:
+        return "{}_{}".format(strCommand(name), strParams(params))
 
 def strParams(params): # [Point, Point, int] -> "ppi"
     return ''.join(type_to_shortcut[type(x)] if type(x) in type_to_shortcut else '?' for x in params)
@@ -419,7 +423,7 @@ def minus_a(angle):
     return AngleSize(-angle.angle)
 
 def minus_A(anglesize):
-    return AngleSize(-anglesize.x)
+    return AngleSize(-anglesize.value)
 
 def minus_m(m):
     return Measure(-m.x, m.dim)
@@ -514,10 +518,10 @@ def polar_pc(point, circle):
 
 def polygon_ppi(p1, p2, n):
     p1c, p2c = (a_to_cpx(p.a) for p in (p1, p2))
-    alpha = 2 * np.pi/n
-    center = p2c + (p1c-p2c)/(1-np.exp(-alpha * 1j))
+    alpha = 2 * np.pi / n
+    center = p2c + (p1c - p2c) / (1 - np.exp(-alpha * 1j))
     v = p2c - center
-    points = [Point(cpx_to_a(center + v * np.exp(i * alpha * 1j))) for i in range(1, n - 1)]
+    points = [Point(cpx_to_a(center + v * np.exp(i * alpha * 1j))) for i in range(1, int(n) - 1)]
     raw_points = [p.a for p in [p1, p2] + points]
     segments = [
         Segment(p1, p2)
@@ -562,7 +566,7 @@ def product_ff(f1, f2):
     return Measure(f1 * f2, 0)
 
 def product_iA(i, angle_size):
-    return AngleSize(angle_size.x * i)
+    return AngleSize(angle_size.value * i)
 
 def product_im(i, m):
     return Measure(i * m.x, m.dim)
@@ -613,12 +617,12 @@ def rotate_pap(point, angle, by_point):
     return Point(by_point.a + rotate_vec(point.a - by_point.a, angle.angle))
 
 def rotate_pAp(point, angle_size, by_point):
-    return Point(by_point.a + rotate_vec(point.a - by_point.a, angle_size.x))
+    return Point(by_point.a + rotate_vec(point.a - by_point.a, angle_size.value))
 
 def segment_pp(p1, p2):
     return Segment(p1.a, p2.a)
 
-def semicircle(p1, p2):
+def semicircle_pp(p1, p2):
     vec = a_to_cpx(p1.a - p2.a)
     return Arc(
         (p1.a + p2.a) / 2,

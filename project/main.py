@@ -1,8 +1,3 @@
-import lib_vars
-import lib_elements
-import lib_commands
-import lib_expressions
-
 from lib_vars import *
 from lib_elements import *
 from lib_commands import *
@@ -11,17 +6,33 @@ from lib_expressions import *
 from construction import *
 
 #import short_parser
-#import ggb_parser
+import ggb_parser
 
 import draw_simple
+import draw_mp
+
+import os
 
 #--------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    #construction = shortpy_parser.load("shortpy_test.txt")
-    #construction = short_parser.load("short_test.txt")
-    #construction = ggb_parser.load("test.ggb")
+    #constr = shortpy_parser.load("shortpy_test.txt")
+    #constr = short_parser.load("short_test.txt")
 
+    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+
+
+    print("BEFORE:\n" + str(constr))
+
+    constr.rebuild()
+
+    print("AFTER:\n" + str(constr))
+
+    draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
+
+#--------------------------------------------------------------------------
+
+def test1():
     constr = Construction()
 
     # длины сторон треугольника a, b, c
@@ -50,7 +61,7 @@ if __name__ == "__main__":
     constr.add(Command("OrthogonalLine", ["O", "l"], "h"))
     constr.add(Command("Intersect", ["h", "l"], "H"))
     constr.add(Command("Circle", ["O", "H"], "ω"))
-    
+
     print("BEFORE:\n" + str(constr))
 
     constr.rebuild()
@@ -64,8 +75,6 @@ if __name__ == "__main__":
     constr.elementByName("H").visible = False
 
     print("AFTER:\n" + str(constr))
-
-
 
     draw_simple.Add(constr)
 
