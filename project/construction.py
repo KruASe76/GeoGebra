@@ -29,6 +29,13 @@ class Construction:
         str_out += "-------------------\n"
         return str_out
 
+    def new_repr(self):
+        return "-------------------\n[[construction]]:\n" + \
+            f"\n[{len(self.vars)} vars]:\n" + '\n'.join(map(str, self.vars)) + "\n" + \
+                f"\n[{len(self.elements)} elements]:\n" + '\n'.join(map(str, self.elements)) + "\n" + \
+                    f"\n[{len(self.commands)} commands]:\n" + '\n'.join(map(str, self.commands)) + "\n" + \
+                        "-------------------\n"
+
     def add(self, obj):
         if isinstance(obj, Var): self.vars.append(obj)
         elif isinstance(obj, Element): self.elements.append(obj)
