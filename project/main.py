@@ -15,23 +15,6 @@ import os
 
 #--------------------------------------------------------------------------
 
-if __name__ == "__main__":
-    #constr = shortpy_parser.load("shortpy_test.txt")
-    #constr = short_parser.load("short_test.txt")
-
-    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
-
-
-    print("BEFORE:\n" + str(constr))
-
-    constr.rebuild()
-
-    print("AFTER:\n" + str(constr))
-
-    draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
-
-#--------------------------------------------------------------------------
-
 def test1():
     constr = Construction()
 
@@ -87,3 +70,20 @@ def test1():
     draw_simple.Add(constr)
 
     draw_simple.Show()
+    
+#--------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+
+
+    print("BEFORE:\n" + str(constr))
+
+    constr.rebuild()
+
+    print("AFTER:\n" + str(constr))
+
+    draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
+    
+    
+    # test1()
