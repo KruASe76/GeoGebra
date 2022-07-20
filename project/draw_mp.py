@@ -60,9 +60,16 @@ def exportMP(constr: Construction, mp_path: str, mp_header_path: str):
 
         elif type(el.data) == Segment:
             f.write("Segment(({}u, {}u), ({}u, {}u));\n".format(el.data.end_points[0][0], el.data.end_points[0][1], el.data.end_points[1][0], el.data.end_points[1][1]))
+            f.write("LineMark(({}u, {}u), ({}u, {}u), 2);\n".format(el.data.end_points[0][0], el.data.end_points[0][1], el.data.end_points[1][0], el.data.end_points[1][1]))
 
         elif type(el.data) == Circle:
             f.write("Circle(({}u, {}u), {}u);\n".format(el.data.c[0], el.data.c[1], el.data.r))
+
+        elif type(el.data) == Angle:
+            f.write("AngleMark(({}u, {}u), ({}u, {}u), ({}u, {}u), 2);\n".format( \
+                el.data.p[0], el.data.p[1], 
+                el.data.p[0] + el.data.v1[0], el.data.p[1] + el.data.v1[1], 
+                el.data.p[0] + el.data.v2[0], el.data.p[1] + el.data.v2[1] ))
 
     f.write("\nendfig;\n")
     f.write("end\n")
