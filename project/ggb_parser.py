@@ -2,7 +2,6 @@ import os
 import shutil
 from zipfile import ZipFile
 from xml.etree import ElementTree
-from xml.etree.ElementTree import Element
 
 from construction import Construction
 from lib_commands import Command
@@ -11,7 +10,7 @@ from lib_commands import Command
 temp_path = os.path.join(os.getcwd(), "temp")
 
 
-def get_constr_elem(ggb_path: str) -> Element:
+def get_constr_elem(ggb_path: str) -> ElementTree.Element:
     try:    
         os.mkdir(temp_path)
     except FileExistsError:
@@ -28,7 +27,7 @@ def get_constr_elem(ggb_path: str) -> Element:
     return root.find("construction")
 
 
-def apply_points(constr_elem: Element) -> None:
+def apply_points(constr_elem: ElementTree.Element) -> None:
     global constr
     
     for point_elem in constr_elem.findall('element[@type="point"]'):
@@ -36,7 +35,7 @@ def apply_points(constr_elem: Element) -> None:
         coords.pop(-1) # removing z coordinate
         constr.add(Command("Point", coords, point_elem.attrib["label"]))
         
-def apply_commands(constr_elem: Element) -> None:
+def apply_commands(constr_elem: ElementTree.Element) -> None:
     global constr
     
     for comm_elem in constr_elem.findall("command"):
