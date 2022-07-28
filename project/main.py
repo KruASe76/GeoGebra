@@ -7,6 +7,7 @@ from construction import *
 
 #import short_parser
 import ggb_parser
+import ggb_generator
 
 import draw_simple
 import draw_mp
@@ -70,20 +71,17 @@ def test1():
     draw_simple.Add(constr)
 
     draw_simple.Show()
-    
+
+def test2():
+    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+    print(constr)
+    draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
+
+def test3():
+    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+    ggb_generator.save(constr, "GeoGebra/files/all_elements2.ggb")
+
 #--------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
-
-
-    print("BEFORE:\n" + str(constr))
-
-    constr.rebuild()
-
-    print("AFTER:\n" + str(constr))
-
-    draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
-    
-    
-    # test1()
+    test3()

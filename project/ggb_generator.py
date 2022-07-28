@@ -13,8 +13,8 @@ from lib_commands import Command
 from ggb_parser import load
 
 
-temp_path = os.path.join(os.getcwd(), "temp")
-source_path = os.path.join(os.getcwd(), "project", "source")
+temp_path = os.path.join(os.getcwd(), "GeoGebra", "temp")
+source_path = os.path.join(os.getcwd(), "GeoGebra", "project", "source")
 
 
 def get_point_elem(comm: Command) -> Element:
