@@ -12,7 +12,7 @@ class Construction:
     def __init__(self):
         self.vars = []
         self.elements = []
-        self.commands = []
+        self.commands: list[Command] = []
 
     def __repr__(self):
         str_out = "-------------------\n[[construction]]:\n"
@@ -40,24 +40,24 @@ class Construction:
         if isinstance(obj, Var): self.vars.append(obj)
         elif isinstance(obj, Element): self.elements.append(obj)
         elif isinstance(obj, Command): self.commands.append(obj)
+        
+    def elementByName(self, name: str) -> Element | None:
+        result = list(filter(lambda elem: elem.name == name, self.elements))
+        return result[0] if result else None
 
-    def varByName(self, name):
-        for var in self.vars:
-            if var.name == name: return var
-        return None
+    def varByName(self, name:str) -> Var | None:
+        result = list(filter(lambda var: var.name == name, self.vars))
+        return result[0] if result else None
 
-    def elementByName(self, name):
-        for element in self.elements:
-            if element.name == name: return element
-        return None
+    def objectByName(self, name: str) -> Element | Var | None:
+        result_element = list(filter(lambda elem: elem.name == name, self.elements))
+        result_var = list(filter(lambda var: var.name == name, self.vars))
+        result = result_element + result_var
+        return result[0] if result else None
 
-    def objectByName(self, name):
-        obj = None
-        for var in self.vars:
-            if var.name == name: obj = var
-        for element in self.elements:
-            if element.name == name: obj = element
-        return obj
+    def commandByElementName(self, name: str) -> Command | None:
+        result = list(filter(lambda comm: comm.outputs[0] == name, self.commands))
+        return result[0] if result else None
 
     def dataByStr(self, text):
         obj = self.objectByName(text)

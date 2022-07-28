@@ -2,11 +2,6 @@ __pycache__/
 **/.DS_Store
 
 /docs
-<<<<<<< HEAD
 README.rst
-**/.DS_Store
-=======
-/README.rst
->>>>>>> 120adc65c3ee6e558650bf1096b2109da75cb358
 
 **temp**
