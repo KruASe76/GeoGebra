@@ -137,7 +137,7 @@ class Segment(Line):
         assert((p1 != p2).any())
         normal_vec = vector_perp_rot(p1 - p2)
         c = np.dot(p1, normal_vec)
-        Line.__init__(self, normal_vec, c)
+        super().__init__(normal_vec, c)
         
         self.end_points = np.array([p1, p2])
         self.length = np.linalg.norm(p1 - p2)
@@ -168,7 +168,7 @@ class Ray(Line):
     def __init__(self, start_point, vec):
         normal_vec = -vector_perp_rot(vec)
         c = np.dot(start_point, normal_vec)
-        Line.__init__(self, normal_vec, c)
+        super().__init__(normal_vec, c)
         self.start_point = start_point
 
     def translate(self, vec):
@@ -291,7 +291,7 @@ class Circle:
 
 class Arc(Circle):
     def __init__(self, center, r, angles):
-        Circle.__init__(self, center, r)
+        super().__init__(center, r)
         self.angles = [a % (2*np.pi) for a in angles]
 
     def important_points(self):

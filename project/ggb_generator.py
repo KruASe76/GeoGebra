@@ -9,7 +9,7 @@ from folder2zip import convert
 
 from construction import Construction
 from lib_commands import Command
-from lib_elements import Element, Point, Line
+from lib_elements import *
 
 from ggb_parser import load
 
@@ -18,7 +18,10 @@ temp_path = os.path.join(os.getcwd(), "GeoGebra", "temp")
 source_path = os.path.join(os.getcwd(), "GeoGebra", "project", "source")
 
 
-def line_coords(comm: Command, constr: Construction): #-> tuple[int, int, int]:  # line equation coefficients
+def line_coords(data: Line | Ray | Segment) -> tuple[int, int, int]:  # line equation coefficients
+    return *data.n, -data.c
+    # some useless but working code (if comm: Command and constr: Construction are passed):
+    """    
     elem1, elem2 = map(lambda name: constr.elementByName(name), comm.inputs)
     if comm.name in ("Line", "Ray", "Segment"):
         if isinstance(elem1.data, Point) and isinstance(elem2.data, Point):
@@ -34,7 +37,10 @@ def line_coords(comm: Command, constr: Construction): #-> tuple[int, int, int]: 
         a, b, _ = line_coords(reference_line_comm, constr)
         a, b = -b, a
         return a, b, -(a * elem1.data.a[0] + b * elem1.data.a[1])
+    """
 
+def conic_matrix(data: Circle | Arc) -> tuple[int, int, int, int, int, int]:
+    return 1, 1, data.c[0]**2 + data.c[1]**2 - data.r_squared, 0, -data.c[0], -data.c[1]
 
 def get_point_elem(comm: Command, constr: Construction) -> ElementTree.Element:
     elem = ElementTree.Element(
@@ -114,7 +120,7 @@ def get_point_elem(comm: Command, constr: Construction) -> ElementTree.Element:
     return elem
 
 def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
-    a, b, c = line_coords(comm, constr)
+    coords = line_coords(constr.elementByName(comm.outputs[0]).data)
     
     comm_elem = ElementTree.Element(
         "command",
@@ -126,16 +132,11 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
         [
             ElementTree.Element(
                 "input",
-                attrib={
-                    "a0": comm.inputs[0],
-                    "a1": comm.inputs[1]
-                }
+                attrib={f"a{ind}": input for ind, input in enumerate(comm.inputs)}
             ),
             ElementTree.Element(
                 "output",
-                attrib={
-                    "a0": comm.outputs[0]
-                }
+                attrib={f"a{ind}": output for ind, output in enumerate(comm.outputs)}
             )
         ]
     )
@@ -143,7 +144,7 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
     elem_elem = ElementTree.Element(
         "element",
         attrib={
-            "type": comm.name.lower(),
+            "type": "line" if comm.name == "OrthogonalLine" else comm.name.lower(),
             "label": comm.outputs[0]
         }
     )
@@ -179,11 +180,7 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
             ),
             ElementTree.Element(
                 "coords",
-                attrib = {
-                    "x": str(a),
-                    "y": str(b),
-                    "z": str(c)
-                }
+                attrib = {name: str(value) for name, value in zip("xyz", coords)}
             ),
             ElementTree.Element(
                 "lineStyle",
@@ -222,6 +219,110 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
     
     return comm_elem, elem_elem
 
+def get_conics_elems(comm: Command, constr: Construction) -> ElementTree.Element:
+    matrix = conic_matrix(constr.elementByName(comm.outputs[0]).data)
+
+    comm_elem = ElementTree.Element(
+        "command",
+        attrib={
+            "name": comm.name
+        }
+    )
+    comm_elem.extend(
+        [
+            ElementTree.Element(
+                "input",
+                attrib={f"a{ind}": input for ind, input in enumerate(comm.inputs)}
+            ),
+            ElementTree.Element(
+                "output",
+                attrib={f"a{ind}": output for ind, output in enumerate(comm.outputs)}
+            )
+        ]
+    )
+    
+    elem_elem = ElementTree.Element(
+        "element",
+        attrib={
+            "type": "conic" if comm.name == "Circle" else "conicpart",
+            "label": comm.outputs[0]
+        }
+    )
+    elem_elem.extend(
+        [
+            ElementTree.Element(
+                "show",
+                attrib = {
+                    "object": str(constr.elementByName(comm.outputs[0]).visible).lower(),
+                    "label": "false"
+                }
+            ),
+            ElementTree.Element(
+                "objColor",
+                attrib = {
+                    "r": "97",
+                    "g": "97",
+                    "b": "97",
+                    "alpha": "0"
+                }
+            ),
+            ElementTree.Element(
+                "layer",
+                attrib = {
+                    "val": "0"
+                }
+            ),
+            ElementTree.Element(
+                "labelMode",
+                attrib = {
+                    "val": "0"
+                }
+            ),
+            ElementTree.Element(
+                "lineStyle",
+                attrib={
+                    "thickness": "5",
+                    "type": "0",
+                    "typeHidden": "1",
+                    "opacity": "204"
+                }
+            ),
+            ElementTree.Element(
+                "eigenvectors",
+                attrib={name: str(value) for name, value in zip(("x0", "y0", "z0", "x1", "y1", "z1"), (1, 0, 1.0, 0, 1, 1.0))}
+            ),
+            ElementTree.Element(
+                "matrix",
+                attrib={f"A{ind}": str(value) for ind, value, in enumerate(matrix)}
+            ),
+            ElementTree.Element(
+                "eqnStyle",
+                attrib={
+                    "style": "specific"
+                }
+            )
+        ]
+    )
+    if comm.name == "Semicircle":
+        elem_elem.extend(
+            [
+                ElementTree.Element(
+                    "outlyingIntersections",
+                    attrib={
+                        "val": "false"
+                    }
+                ),
+                ElementTree.Element(
+                    "keepTypeOnTransform",
+                    attrib={
+                        "val": "true"
+                    }
+                )
+            ]
+        )
+    
+    return comm_elem, elem_elem
+
 
 def save(constr: Construction, path: str) -> None:
     shutil.copytree(source_path, temp_path)
@@ -235,6 +336,9 @@ def save(constr: Construction, path: str) -> None:
             constr_elem.append(elem)
         elif comm.name in ("Line", "OrthogonalLine", "Ray", "Segment"):
             elems = get_lines_elems(comm, constr)
+            constr_elem.extend(elems)
+        elif comm.name in ("Circle", "Semicircle"):
+            elems = get_conics_elems(comm, constr)
             constr_elem.extend(elems)
 
     xml.write(os.path.join(temp_path, "geogebra.xml"))
