@@ -41,21 +41,21 @@ class Construction:
         elif isinstance(obj, Element): self.elements.append(obj)
         elif isinstance(obj, Command): self.commands.append(obj)
         
-    def elementByName(self, name: str) -> Element | None:
+    def elementByName(self, name: str): # -> Element | None:
         result = list(filter(lambda elem: elem.name == name, self.elements))
         return result[0] if result else None
 
-    def varByName(self, name:str) -> Var | None:
+    def varByName(self, name:str): # -> Var | None:
         result = list(filter(lambda var: var.name == name, self.vars))
         return result[0] if result else None
 
-    def objectByName(self, name: str) -> Element | Var | None:
+    def objectByName(self, name: str): # -> Element | Var | None:
         result_element = list(filter(lambda elem: elem.name == name, self.elements))
         result_var = list(filter(lambda var: var.name == name, self.vars))
         result = result_element + result_var
         return result[0] if result else None
 
-    def commandByElementName(self, name: str) -> Command | None:
+    def commandByElementName(self, name: str): # -> Command | None:
         result = list(filter(lambda comm: comm.outputs[0] == name, self.commands))
         return result[0] if result else None
 

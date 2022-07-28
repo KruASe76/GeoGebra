@@ -16,7 +16,7 @@ import os
 
 #--------------------------------------------------------------------------
 
-def test1():
+def testConstruction():
     constr = Construction()
 
     # длины сторон треугольника a, b, c
@@ -46,8 +46,6 @@ def test1():
     constr.add(Command("Intersect", ["h", "l"], "H"))
     constr.add(Command("Circle", ["O", "H"], "ω"))
 
-    print("BEFORE:\n" + str(constr))
-
     constr.rebuild()
 
     constr.elementByName("ω1").visible = False
@@ -58,7 +56,12 @@ def test1():
     constr.elementByName("h").visible = False
     constr.elementByName("H").visible = False
 
-    print("AFTER:\n" + str(constr))
+    return constr
+
+def test1():
+    constr = testConstruction()
+
+    #print("AFTER:\n" + str(constr))
 
     draw_simple.Add(constr)
 
@@ -78,7 +81,8 @@ def test2():
     draw_mp.exportPDF(constr, "GeoGebra/files/metapost/test.pdf")
 
 def test3():
-    constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+    #constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
+    constr = testConstruction()
     ggb_generator.save(constr, "GeoGebra/files/all_elements2.ggb")
 
 #--------------------------------------------------------------------------

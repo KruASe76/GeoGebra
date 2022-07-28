@@ -18,7 +18,7 @@ temp_path = os.path.join(os.getcwd(), "GeoGebra", "temp")
 source_path = os.path.join(os.getcwd(), "GeoGebra", "project", "source")
 
 
-def line_coords(comm: Command, constr: Construction) -> tuple[int, int, int]:  # line equation coefficients
+def line_coords(comm: Command, constr: Construction): #-> tuple[int, int, int]:  # line equation coefficients
     elem1, elem2 = map(lambda name: constr.elementByName(name), comm.inputs)
     if comm.name in ("Line", "Ray", "Segment"):
         if isinstance(elem1.data, Point) and isinstance(elem2.data, Point):
