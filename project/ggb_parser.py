@@ -7,6 +7,7 @@ from xml.etree import ElementTree
 
 from construction import Construction
 from lib_commands import Command
+from lib_vars import Var, AngleSize
 
 
 temp_path = os.path.join(os.getcwd(), "temp")
@@ -31,7 +32,7 @@ def get_constr_elem(ggb_path: str) -> ElementTree.Element:
     
     return root.find("construction")
 
-def parce(constr_elem: ElementTree.Element) -> Construction:
+def parse(constr_elem: ElementTree.Element) -> Construction:
     constr = Construction()
     elems_left_to_pass = 0
     
@@ -53,12 +54,26 @@ def parce(constr_elem: ElementTree.Element) -> Construction:
             
             constr.add(Command(comm_name, list(input_elem.attrib.values()), list(output_elem.attrib.values())))
             elems_left_to_pass = len(output_elem.attrib)
-        else:  # elem has to be commandless point
-            if elem.tag != "element" and elem.attrib["type"] != "point":
-                raise ElementTree.ParseError(f"Unexpected element met:\n<{elem.tag}>, {elem.attrib}")
-            coords = list(elem.find("coords").attrib.values())
-            coords.pop(-1) #  removing z coordinate
-            constr.add(Command("Point", coords, elem.attrib["label"]))
+            continue
+        
+        # Here elem has to be a commandless point or numeric (Var)
+        
+        if elem.tag == "element":
+            if elem.attrib["type"] == "point":
+                coords = list(elem.find("coords").attrib.values())
+                coords.pop(-1) #  removing z coordinate
+                constr.add(Command("Point", coords, elem.attrib["label"]))
+                continue
+            if elem.attrib["type"] == "numeric":
+                value_elem = elem.find("value")
+                constr.add(Var(elem.attrib["label"], float(value_elem.attrib["val"])))
+                continue
+            if elem.attrib["type"] == "angle":
+                value_elem = elem.find("value")
+                constr.add(Var(elem.attrib["label"], AngleSize(float(value_elem.attrib["val"]))))
+                continue
+        
+        raise ElementTree.ParseError(f"Unexpected element met:\n\t<{elem.tag}>, {elem.attrib}")
     
     constr.rebuild()
     return constr
@@ -66,6 +81,6 @@ def parce(constr_elem: ElementTree.Element) -> Construction:
 
 def load(ggb_path: str) -> Construction:
     constr_elem = get_constr_elem(ggb_path)
-    constr = parce(constr_elem)
+    constr = parse(constr_elem)
     
     return constr

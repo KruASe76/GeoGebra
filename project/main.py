@@ -83,7 +83,8 @@ def test2():
 def test3():
     #constr = ggb_parser.load("GeoGebra/files/all_elements.ggb")
     constr = testConstruction()
-    ggb_generator.save(constr, "GeoGebra/files/all_elements2.ggb")
+    print(constr)
+    ggb_generator.save(constr, "files/all_elements2.ggb")
 
 #--------------------------------------------------------------------------
 

@@ -9,6 +9,7 @@ from folder2zip import convert
 from construction import Construction
 from lib_commands import Command
 from lib_elements import *
+from lib_vars import Var, AngleSize, Measure
 
 from ggb_parser import load
 
@@ -300,6 +301,101 @@ def get_conics_elems(comm: Command, constr: Construction) -> tuple[ElementTree.E
     
     return get_comm_elem(comm), elem_elem
 
+def get_vars_elem(var: Var) -> ElementTree.Element:
+    if type(var.data) != AngleSize:
+        limit = 10 ** len(str(int(var.data) + 1).replace("-", ""))
+    
+    elem_elem = ElementTree.Element(
+        "element",
+        attrib={
+            "type": "angle" if type(var.data) == AngleSize else "numeric",
+            "label": var.name
+        }
+    )
+    elem_elem.extend(
+        [
+            ElementTree.Element(
+                "value",
+                attrib={
+                    "val": str(var.data.value) if type(var.data) == AngleSize else str(var.data)
+                }
+            ),
+            ElementTree.Element(
+                "slider",
+                attrib={
+                    "min": "0°" if type(var.data) == AngleSize else str(-limit),
+                    "max": "360°" if type(var.data) == AngleSize else str(limit),
+                    "absoluteScreenLocation": "true",
+                    "width": "200",
+                    "x": "100",
+                    "y": "100",
+                    "fixed": "false",
+                    "horizontal": "true",
+                    "showAlgebra": "true"
+                }
+            ),
+            ElementTree.Element(
+                "show",
+                attrib={
+                    "object": "true",
+                    "label": "true"
+                }
+            ),
+            ElementTree.Element(
+                "objColor",
+                attrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (0, 0, 0, 0.1))}
+            ),
+            ElementTree.Element(
+                "layer",
+                attrib = {
+                    "val": "0"
+                }
+            ),
+            ElementTree.Element(
+                "labelMode",
+                attrib = {
+                    "val": "1"
+                }
+            ),
+            ElementTree.Element(
+                "lineStyle",
+                attrib={
+                    "thickness": "10",
+                    "type": "0",
+                    "typeHidden": "1",
+                    "opacity": "153" if type(var.data) == AngleSize else "255"
+                }
+            ),
+            ElementTree.Element(
+                "animation",
+                attrib={
+                    "speed": "1",
+                    "type": "0",
+                    "playing": "false"
+                }
+            )
+        ]
+    )
+    if type(var.data) == AngleSize:
+        elem_elem.extend(
+            [
+                ElementTree.Element(
+                    "angleStyle",
+                    attrib={
+                        "val": "3"
+                    }
+                ),
+                ElementTree.Element(
+                    "arcSize",
+                    attrib={
+                        "val": "30"
+                    }
+                )
+            ]
+        )
+    
+    return elem_elem
+
 
 def save(constr: Construction, path: str) -> None:
     shutil.copytree(source_path, temp_path)
@@ -307,16 +403,21 @@ def save(constr: Construction, path: str) -> None:
     xml = ElementTree.parse(os.path.join(temp_path, "geogebra.xml"))
     constr_elem = xml.find("construction")
     
+    for var in constr.vars:
+        if type(var.data) == Measure:
+            continue
+        elem = get_vars_elem(var)
+        constr_elem.append(elem)
+    
     for comm in constr.commands:
         if comm.name in ("Point", "Intersect", "Rotate"):
             elems = get_points_elems(comm, constr)
-            constr_elem.extend(elems)
         elif comm.name in ("Line", "OrthogonalLine", "Ray", "Segment"):
             elems = get_lines_elems(comm, constr)
-            constr_elem.extend(elems)
         elif comm.name in ("Circle", "Semicircle"):
             elems = get_conics_elems(comm, constr)
-            constr_elem.extend(elems)
+        
+        constr_elem.extend(elems)
 
     xml.write(os.path.join(temp_path, "geogebra.xml"))
     

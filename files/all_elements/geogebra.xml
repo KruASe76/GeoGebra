@@ -53,8 +53,8 @@
 	<euclidianView>
 		<viewNumber viewNo="1" />
 		<size width="1156" height="810" />
-		<coordSystem xZero="496.27975499999997" yZero="294.986095" scale="88.57805000000008"
-			yscale="88.57805000000019" />
+		<coordSystem xZero="713.6770528730294" yZero="127.12501087102468" scale="79.36184961813723"
+			yscale="79.36184961813727" />
 		<evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1" checkboxSize="26"
 			gridType="3" />
 		<bgColor r="255" g="255" b="255" />
@@ -817,6 +817,52 @@
 			<coords x="3.232050807568878" y="-2.6698729810778072" z="1" />
 			<pointSize val="5" />
 			<pointStyle val="0" />
+		</element>
+		<element type="numeric" label="var">
+			<value val="-44" />
+			<show object="true" label="true" />
+			<objColor r="0" g="0" b="0" alpha="0.10000000149011612" />
+			<layer val="0" />
+			<labelMode val="1" />
+			<slider min="-100" max="100" absoluteScreenLocation="true" width="200" x="264" y="520" fixed="false"
+				horizontal="true" showAlgebra="true" />
+			<lineStyle thickness="10" type="0" typeHidden="1" />
+			<animation step="2" speed="1" type="0" playing="false" />
+		</element>
+		<element type="numeric" label="defaultVar">
+			<value val="1" />
+			<show object="true" label="true" />
+			<objColor r="0" g="0" b="0" alpha="0.10000000149011612" />
+			<layer val="0" />
+			<labelMode val="1" />
+			<slider min="-5" max="5" absoluteScreenLocation="true" width="200" x="836" y="692" fixed="false"
+				horizontal="true" showAlgebra="true" />
+			<lineStyle thickness="10" type="0" typeHidden="1" />
+			<animation speed="1" type="0" playing="false" />
+		</element>
+		<element type="angle" label="γ">
+			<angleStyle val="3" />
+			<value val="3.7699111843077517" />
+			<slider min="0°" max="360°" absoluteScreenLocation="true" width="180" x="148" y="633" fixed="false"
+				horizontal="true" showAlgebra="true" />
+			<show object="true" label="true" />
+			<objColor r="0" g="0" b="0" alpha="0.10000000149011612" />
+			<layer val="0" />
+			<labelMode val="1" />
+			<lineStyle thickness="10" type="0" typeHidden="2" opacity="153" />
+			<arcSize val="30" />
+			<animation speed="1" type="0" playing="false" />
+		</element>
+		<element type="numeric" label="n_1">
+			<value val="14" />
+			<show object="true" label="true" />
+			<objColor r="0" g="0" b="0" alpha="0.10000000149011612" />
+			<layer val="0" />
+			<labelMode val="1" />
+			<slider min="1" max="30" absoluteScreenLocation="true" width="200" x="196" y="724" fixed="false"
+				horizontal="true" showAlgebra="true" />
+			<lineStyle thickness="10" type="0" typeHidden="1" />
+			<animation step="1" speed="1" type="0" playing="false" />
 		</element>
 	</construction>
 </geogebra>

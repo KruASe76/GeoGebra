@@ -210,7 +210,7 @@
 	<objColor r="0" g="0" b="0" alpha="0.10000000149011612"/>
 	<layer val="0"/>
 	<autocolor val="false"/>
-	<labelMode val="2"/>
+	<labelMode val="4"/>
 	<lineStyle thickness="4" type="0" typeHidden="2" opacity="153"/>
 	<arcSize val="30"/>
 	<animation speed="1" type="0" playing="false"/>
