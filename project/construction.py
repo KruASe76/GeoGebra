@@ -11,7 +11,10 @@ from lib_expressions import *
 class Construction:
     def __init__(self):
         self.vars = []
-        self.elements = []
+        self.elements = [
+            Element("xAxis", Line((0, 1), 0), visible=False),
+            Element("yAxis", Line((1, 0), 0), visible=False)
+        ]
         self.commands = []
 
     def __repr__(self):
@@ -80,7 +83,7 @@ class Construction:
 
     def copy(self, command):
         assert(isinstance(command, Command))
-        command_copy = Command(command.name, command.inputs.copy(), command.outputs.copy())
+        command_copy = Command(command.name, list(command.inputs).copy(), list(command.outputs).copy())
         return command_copy
 
     def apply(self, command_original):

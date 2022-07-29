@@ -1,5 +1,4 @@
-# TODO: ggb_generator.save(construction, path)
-# Later it will be construction.Construction()'s method
+# Later it will be construction.Construction()'s classmethod
 
 import os
 import shutil
@@ -14,8 +13,31 @@ from lib_elements import *
 from ggb_parser import load
 
 
-temp_path = os.path.join(os.getcwd(), "GeoGebra", "temp")
-source_path = os.path.join(os.getcwd(), "GeoGebra", "project", "source")
+temp_path = os.path.join(os.getcwd(), "temp")
+source_path = os.path.join(os.getcwd(), "project", "source")
+
+
+def get_comm_elem(comm: Command) -> ElementTree.Element:
+    comm_elem = ElementTree.Element(
+        "command",
+        attrib={
+            "name": comm.name
+        }
+    )
+    comm_elem.extend(
+        [
+            ElementTree.Element(
+                "input",
+                attrib={f"a{ind}": input for ind, input in enumerate(comm.inputs)}
+            ),
+            ElementTree.Element(
+                "output",
+                attrib={f"a{ind}": output for ind, output in enumerate(comm.outputs)}
+            )
+        ]
+    )
+
+    return comm_elem
 
 
 def line_coords(data: Line | Ray | Segment) -> tuple[int, int, int]:  # line equation coefficients
@@ -42,31 +64,29 @@ def line_coords(data: Line | Ray | Segment) -> tuple[int, int, int]:  # line equ
 def conic_matrix(data: Circle | Arc) -> tuple[int, int, int, int, int, int]:
     return 1, 1, data.c[0]**2 + data.c[1]**2 - data.r_squared, 0, -data.c[0], -data.c[1]
 
-def get_point_elem(comm: Command, constr: Construction) -> ElementTree.Element:
-    elem = ElementTree.Element(
+
+def get_points_elems(comm: Command, constr: Construction) -> tuple[ElementTree.Element]:
+    point_elem = constr.elementByName(comm.outputs[0])
+    
+    elem_elem = ElementTree.Element(
         "element",
         attrib={
             "type": "point",
             "label": comm.outputs[0]
         }
     )
-    elem.extend(
+    elem_elem.extend(
         [
             ElementTree.Element(
                 "show",
                 attrib = {
-                    "object": str(constr.elementByName(comm.outputs[0]).visible).lower(),
+                    "object": str(point_elem.visible).lower(),
                     "label": "true"
                 }
             ),
             ElementTree.Element(
                 "objColor",
-                attrib = {
-                    "r": "0",
-                    "g": "0",
-                    "b": "0",
-                    "alpha": "0"
-                }
+                attrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (97, 97, 97, 0) if comm.name == "Intersect" else (21, 101, 192, 0))}
             ),
             ElementTree.Element(
                 "layer",
@@ -98,48 +118,34 @@ def get_point_elem(comm: Command, constr: Construction) -> ElementTree.Element:
             ElementTree.Element(
                 "coords",
                 attrib = {
-                    "x": comm.inputs[0],
-                    "y": comm.inputs[1],
+                    "x": str(point_elem.data.a[0]),
+                    "y": str(point_elem.data.a[1]),
                     "z": "1"
                 }
             ),
             ElementTree.Element(
                 "pointSize",
                 attrib = {
-                    "val": "5"
+                    "val": "4" if comm.name == "Intersect" else "5"
                 }
             ),
             ElementTree.Element(
                 "pointStyle",
                 attrib = {
-                    "val": "10"
+                    "val": "0"
                 }
             )
         ]
     )
-    return elem
-
-def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
-    coords = line_coords(constr.elementByName(comm.outputs[0]).data)
     
-    comm_elem = ElementTree.Element(
-        "command",
-        attrib={
-            "name": comm.name
-        }
-    )
-    comm_elem.extend(
-        [
-            ElementTree.Element(
-                "input",
-                attrib={f"a{ind}": input for ind, input in enumerate(comm.inputs)}
-            ),
-            ElementTree.Element(
-                "output",
-                attrib={f"a{ind}": output for ind, output in enumerate(comm.outputs)}
-            )
-        ]
-    )
+    if comm.name == "Point" and len(comm.inputs) == 2:
+        return (elem_elem,)
+    
+    return get_comm_elem(comm), elem_elem
+
+def get_lines_elems(comm: Command, constr: Construction) -> tuple[ElementTree.Element]:
+    line_elem = constr.elementByName(comm.outputs[0])
+    coords = line_coords(line_elem.data)
     
     elem_elem = ElementTree.Element(
         "element",
@@ -153,18 +159,13 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
             ElementTree.Element(
                 "show",
                 attrib = {
-                    "object": str(constr.elementByName(comm.outputs[0]).visible).lower(),
+                    "object": str(line_elem.visible).lower(),
                     "label": "false"
                 }
             ),
             ElementTree.Element(
                 "objColor",
-                attrib = {
-                    "r": "97",
-                    "g": "97",
-                    "b": "97",
-                    "alpha": "0"
-                }
+                aattrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (97, 97, 97, 0))}
             ),
             ElementTree.Element(
                 "layer",
@@ -217,30 +218,11 @@ def get_lines_elems(comm: Command, constr: Construction) -> ElementTree.Element:
             ]
         )
     
-    return comm_elem, elem_elem
+    return get_comm_elem(comm), elem_elem
 
-def get_conics_elems(comm: Command, constr: Construction) -> ElementTree.Element:
+def get_conics_elems(comm: Command, constr: Construction) -> tuple[ElementTree.Element]:
     matrix = conic_matrix(constr.elementByName(comm.outputs[0]).data)
 
-    comm_elem = ElementTree.Element(
-        "command",
-        attrib={
-            "name": comm.name
-        }
-    )
-    comm_elem.extend(
-        [
-            ElementTree.Element(
-                "input",
-                attrib={f"a{ind}": input for ind, input in enumerate(comm.inputs)}
-            ),
-            ElementTree.Element(
-                "output",
-                attrib={f"a{ind}": output for ind, output in enumerate(comm.outputs)}
-            )
-        ]
-    )
-    
     elem_elem = ElementTree.Element(
         "element",
         attrib={
@@ -259,12 +241,7 @@ def get_conics_elems(comm: Command, constr: Construction) -> ElementTree.Element
             ),
             ElementTree.Element(
                 "objColor",
-                attrib = {
-                    "r": "97",
-                    "g": "97",
-                    "b": "97",
-                    "alpha": "0"
-                }
+                attrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (97, 97, 97, 0))}
             ),
             ElementTree.Element(
                 "layer",
@@ -321,7 +298,7 @@ def get_conics_elems(comm: Command, constr: Construction) -> ElementTree.Element
             ]
         )
     
-    return comm_elem, elem_elem
+    return get_comm_elem(comm), elem_elem
 
 
 def save(constr: Construction, path: str) -> None:
@@ -331,9 +308,9 @@ def save(constr: Construction, path: str) -> None:
     constr_elem = xml.find("construction")
     
     for comm in constr.commands:
-        if comm.name == "Point" and len(comm.inputs) == 2:
-            elem = get_point_elem(comm, constr)
-            constr_elem.append(elem)
+        if comm.name in ("Point", "Intersect", "Rotate"):
+            elems = get_points_elems(comm, constr)
+            constr_elem.extend(elems)
         elif comm.name in ("Line", "OrthogonalLine", "Ray", "Segment"):
             elems = get_lines_elems(comm, constr)
             constr_elem.extend(elems)

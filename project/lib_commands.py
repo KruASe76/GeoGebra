@@ -38,9 +38,9 @@ class Command:
 #--------------------------------------------------------------------------        
 
 def toObjArray(params):
-    if params == None: return []
+    if not params: return []
     elif not isinstance(params, Iterable) or isinstance(params, str): return [params]
-    else: return params
+    else: return list(params)
 
 #--------------------------------------------------------------------------   
 
