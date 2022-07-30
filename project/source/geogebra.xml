@@ -54,14 +54,14 @@
 		<viewNumber viewNo="1" />
 		<size width="1156" height="810" />
 		<coordSystem xZero="578" yZero="405" scale="50" yscale="50" />
-		<evSettings axes="false" grid="false" gridIsBold="false" pointCapturing="3" rightAngleStyle="1"
+		<evSettings axes="true" grid="true" gridIsBold="false" pointCapturing="3" rightAngleStyle="1"
 			checkboxSize="26" gridType="3" />
 		<bgColor r="255" g="255" b="255" />
 		<axesColor r="0" g="0" b="0" />
 		<gridColor r="192" g="192" b="192" />
 		<lineStyle axes="1" grid="0" />
-		<axis id="0" show="false" label="" unitLabel="" tickStyle="1" showNumbers="true" />
-		<axis id="1" show="false" label="" unitLabel="" tickStyle="1" showNumbers="true" />
+		<axis id="0" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true" />
+		<axis id="1" show="true" label="" unitLabel="" tickStyle="1" showNumbers="true" />
 	</euclidianView>
 	<algebraView>
 		<mode val="3" />
@@ -69,7 +69,7 @@
 	<kernel>
 		<continuous val="false" />
 		<usePathAndRegionParameters val="true" />
-		<decimals val="1" />
+		<decimals val="3" />
 		<angleUnit val="degree" />
 		<algebraStyle val="1" spreadsheet="1" />
 		<coordStyle val="0" />
