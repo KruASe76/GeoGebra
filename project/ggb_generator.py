@@ -68,82 +68,86 @@ def conic_matrix(data: Circle | Arc) -> tuple[int, int, int, int, int, int]:
 
 
 def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
-    point_elem = constr.elementByName(comm.outputs[0])
-    
-    elem_xelem = XElement(
-        "element",
-        attrib={
-            "type": "point",
-            "label": comm.outputs[0]
-        }
-    )
-    elem_xelem.extend(
-        [
-            XElement(
-                "show",
-                attrib = {
-                    "object": str(point_elem.visible).lower(),
-                    "label": "true"
-                }
-            ),
-            XElement(
-                "objColor",
-                attrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (97, 97, 97, 0) if comm.name == "Intersect" else (21, 101, 192, 0))}
-            ),
-            XElement(
-                "layer",
-                attrib = {
-                    "val": "0"
-                }
-            ),
-            XElement(
-                "labelMode",
-                attrib = {
-                    "val": "0"
-                }
-            ),
-            XElement(
-                "animation",
-                attrib = {
-                    "step": "0.1",
-                    "speed": "1",
-                    "type": "1",
-                    "playing": "false"
-                }
-            ),
-            XElement(
-                "auxiliary",
-                attrib = {
-                    "val": "false"
-                }
-            ),
-            XElement(
-                "coords",
-                attrib = {
-                    "x": str(point_elem.data.a[0]),
-                    "y": str(point_elem.data.a[1]),
-                    "z": "1"
-                }
-            ),
-            XElement(
-                "pointSize",
-                attrib = {
-                    "val": "4" if comm.name == "Intersect" else "5"
-                }
-            ),
-            XElement(
-                "pointStyle",
-                attrib = {
-                    "val": "0"
-                }
-            )
-        ]
-    )
+    elem_xelems = []
+    for output in comm.outputs:  # Intersection command can output more than one element
+        point_elem = constr.elementByName(output)
+        
+        elem_xelem = XElement(
+            "element",
+            attrib={
+                "type": point_elem.data.__class__.__name__.lower(),
+                "label": point_elem.name
+            }
+        )
+        elem_xelem.extend(
+            [
+                XElement(
+                    "show",
+                    attrib = {
+                        "object": str(point_elem.visible).lower(),
+                        "label": "true"
+                    }
+                ),
+                XElement(
+                    "objColor",
+                    attrib={name: str(value) for name, value in zip(("r", "g", "b", "alpha"), (97, 97, 97, 0) if comm.name in ("Intersect", "Midpoint") else (21, 101, 192, 0))}
+                ),
+                XElement(
+                    "layer",
+                    attrib = {
+                        "val": "0"
+                    }
+                ),
+                XElement(
+                    "labelMode",
+                    attrib = {
+                        "val": "0"
+                    }
+                ),
+                XElement(
+                    "animation",
+                    attrib = {
+                        "step": "0.1",
+                        "speed": "1",
+                        "type": "1",
+                        "playing": "false"
+                    }
+                ),
+                XElement(
+                    "auxiliary",
+                    attrib = {
+                        "val": "false"
+                    }
+                ),
+                XElement(
+                    "coords",
+                    attrib = {
+                        "x": str(point_elem.data.a[0]),
+                        "y": str(point_elem.data.a[1]),
+                        "z": "1"
+                    }
+                ),
+                XElement(
+                    "pointSize",
+                    attrib = {
+                        "val": "4" if comm.name in ("Intersect", "Midpoint") else "5"
+                    }
+                ),
+                XElement(
+                    "pointStyle",
+                    attrib = {
+                        "val": "0"
+                    }
+                )
+            ]
+        )
+        
+        elem_xelems.append(elem_xelem)
     
     if comm.name == "Point" and len(comm.inputs) == 2:
-        return (elem_xelem,)
+        return (elem_xelems[0],)
     
-    return get_comm_xelem(comm), elem_xelem
+    return get_comm_xelem(comm), *elem_xelems
 
 def get_lines_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
     elem_xelems = []
@@ -154,8 +158,8 @@ def get_lines_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
         elem_xelem = XElement(
             "element",
             attrib={
-                "type": line_elem.name,
-                "label": output
+                "type": line_elem.data.__class__.__name__.lower(),
+                "label": line_elem.name
             }
         )
         elem_xelem.extend(
@@ -416,7 +420,7 @@ def save(constr: Construction, path: str) -> None:
         constr_xelem.append(xelem)
     
     for comm in constr.commands:
-        if comm.name in ("Point", "Intersect", "Rotate"):
+        if comm.name in ("Point", "Intersect", "Midpoint", "Rotate", "Translate"):
             xelems = get_points_xelems(comm, constr)
         elif comm.name in ("Line", "OrthogonalLine", "LineBisector", "AngularBisector", "Tangent", "Ray", "Segment"):
             xelems = get_lines_xelems(comm, constr)

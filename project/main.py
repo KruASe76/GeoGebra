@@ -29,7 +29,7 @@ def testConstruction():
     constr.add(Command("Point", ["c", "0"], "B"))
     constr.add(Command("Circle", ["A", "b"], "ω1"))
     constr.add(Command("Circle", ["B", "a"], "ω2"))
-    constr.add(Command("Intersect", ["ω1", "ω2"], "C"))
+    constr.add(Command("Intersect", ["ω1", "ω2"], ["C_1", "C"]))
     constr.add(Command("Polygon", ["A", "B", "C"], "triang")) #пока не создается
     constr.add(Command("Segment", ["A", "B"], "s1"))
     constr.add(Command("Segment", ["B", "C"], "s2"))
