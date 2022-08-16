@@ -1,4 +1,4 @@
-# Later it will be construction.Construction()'s classmethod
+# Later it will be construction.Construction()'s method
 
 import os
 import shutil
@@ -44,24 +44,6 @@ def get_comm_xelem(comm: Command) -> XElement:
 
 def line_coords(data: Line | Ray | Segment) -> tuple[int, int, int]:  # line equation coefficients
     return *data.n, -data.c
-    # some useless but working code (if comm: Command and constr: Construction are passed):
-    """    
-    elem1, elem2 = map(lambda name: constr.elementByName(name), comm.inputs)
-    if comm.name in ("Line", "Ray", "Segment"):
-        if isinstance(elem1.data, Point) and isinstance(elem2.data, Point):
-            left_multiplier = elem2.data.a[1] - elem1.data.a[1]
-            right_multiplier = elem2.data.a[0] - elem1.data.a[0]
-            return -left_multiplier, right_multiplier, -elem1.data.a[0] * left_multiplier - elem1.data.a[1] * right_multiplier
-        else:  # elem2.data is Line
-            reference_line_comm = constr.commandByElementName(elem2.name)
-            a, b, _ = line_coords(reference_line_comm, constr)
-            return a, b, -(a * elem1.data.a[0] + b * elem1.data.a[1])  # free coefficient for that point
-    elif comm.name == "OrthogonalLine":  # elem2.data is Line
-        reference_line_comm = constr.commandByElementName(elem2.name)
-        a, b, _ = line_coords(reference_line_comm, constr)
-        a, b = -b, a
-        return a, b, -(a * elem1.data.a[0] + b * elem1.data.a[1])
-    """
 
 def conic_matrix(data: Circle | Arc) -> tuple[int, int, int, int, int, int]:
     return 1, 1, data.c[0]**2 + data.c[1]**2 - data.r_squared, 0, -data.c[0], -data.c[1]
@@ -83,7 +65,7 @@ def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
             [
                 XElement(
                     "show",
-                    attrib = {
+                    attrib={
                         "object": str(point_elem.visible).lower(),
                         "label": "true"
                     }
@@ -94,19 +76,19 @@ def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
                 ),
                 XElement(
                     "layer",
-                    attrib = {
+                    attrib={
                         "val": "0"
                     }
                 ),
                 XElement(
                     "labelMode",
-                    attrib = {
+                    attrib={
                         "val": "0"
                     }
                 ),
                 XElement(
                     "animation",
-                    attrib = {
+                    attrib={
                         "step": "0.1",
                         "speed": "1",
                         "type": "1",
@@ -115,13 +97,13 @@ def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
                 ),
                 XElement(
                     "auxiliary",
-                    attrib = {
+                    attrib={
                         "val": "false"
                     }
                 ),
                 XElement(
                     "coords",
-                    attrib = {
+                    attrib={
                         "x": str(point_elem.data.a[0]),
                         "y": str(point_elem.data.a[1]),
                         "z": "1"
@@ -129,13 +111,13 @@ def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
                 ),
                 XElement(
                     "pointSize",
-                    attrib = {
+                    attrib={
                         "val": "4" if comm.name in ("Intersect", "Midpoint") else "5"
                     }
                 ),
                 XElement(
                     "pointStyle",
-                    attrib = {
+                    attrib={
                         "val": "0"
                     }
                 )
@@ -145,7 +127,18 @@ def get_points_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
         elem_xelems.append(elem_xelem)
     
     if comm.name == "Point" and len(comm.inputs) == 2:
-        return (elem_xelems[0],)
+        if filter(lambda input: input.isalnum(), comm.inputs):
+            exp_xelem = XElement(
+                "expression",
+                attrib={
+                    "label": point_elem.name,
+                    "exp": f"({', '.join(comm.inputs)})",
+                    "type": "point"
+                }
+            )
+            elem_xelems.insert(0, exp_xelem)
+        
+        return tuple(elem_xelems)
     
     return get_comm_xelem(comm), *elem_xelems
 
@@ -166,7 +159,7 @@ def get_lines_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
             [
                 XElement(
                     "show",
-                    attrib = {
+                    attrib={
                         "object": str(line_elem.visible).lower(),
                         "label": "false"
                     }
@@ -177,19 +170,19 @@ def get_lines_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
                 ),
                 XElement(
                     "layer",
-                    attrib = {
+                    attrib={
                         "val": "0"
                     }
                 ),
                 XElement(
                     "labelMode",
-                    attrib = {
+                    attrib={
                         "val": "0"
                     }
                 ),
                 XElement(
                     "coords",
-                    attrib = {name: str(value) for name, value in zip("xyz", coords)}
+                    attrib={name: str(value) for name, value in zip("xyz", coords)}
                 ),
                 XElement(
                     "lineStyle",
@@ -245,7 +238,7 @@ def get_conics_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
         [
             XElement(
                 "show",
-                attrib = {
+                attrib={
                     "object": str(conic_elem.visible).lower(),
                     "label": "false"
                 }
@@ -256,13 +249,13 @@ def get_conics_xelems(comm: Command, constr: Construction) -> tuple[XElement]:
             ),
             XElement(
                 "layer",
-                attrib = {
+                attrib={
                     "val": "0"
                 }
             ),
             XElement(
                 "labelMode",
-                attrib = {
+                attrib={
                     "val": "0"
                 }
             ),
@@ -357,13 +350,13 @@ def get_vars_xelem(var: Var) -> XElement:
             ),
             XElement(
                 "layer",
-                attrib = {
+                attrib={
                     "val": "0"
                 }
             ),
             XElement(
                 "labelMode",
-                attrib = {
+                attrib={
                     "val": "1"
                 }
             ),
